@@ -21,10 +21,7 @@ window.onload = function() {
   Crafty.c("World", {
     init: function() {
 
-      this.player = Crafty.e("2D, Color, DOM, Multiway")
-        .attr({x: WORLD_WIDTH / 2, y: WORLD_HEIGHT / 2, w: PLAYER_WIDTH, h: PLAYER_HEIGHT, z: 5})
-        .color("white")
-        .multiway(PLAYER_SPEED, {W: -90, S: 90, D: 0, A: 180});
+      this.player = Crafty.e("Player");
       
       this.enemies = [];
       this.targetEnemyIndices = [];
@@ -151,11 +148,25 @@ window.onload = function() {
       }
     }
   });
+
+  Crafty.c("Player", {
+    init: function() {
+      this.addComponent("2D, Color, DOM, Multiway, Collision")
+        .attr({x: WORLD_WIDTH / 2, y: WORLD_HEIGHT / 2, w: PLAYER_WIDTH, h: PLAYER_HEIGHT, z: 5})
+        .color("white")
+        .multiway(PLAYER_SPEED, {W: -90, S: 90, D: 0, A: 180})
+        .collision().onHit("Enemy", this.die);
+    },
+
+    die: function() {
+      console.log("die!!!");
+    }
+  });
   
   Crafty.c("Enemy", {
     
     init: function() {
-      this.addComponent("2D, Color, DOM");
+      this.addComponent("2D, Color, DOM, Collision");
       this.w = ENEMY_WIDTH;
       this.h = ENEMY_HEIGHT;
       this.color("red");
