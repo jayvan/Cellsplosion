@@ -15,65 +15,74 @@ window.onload = function() {
         .attr({x: 400, y: 300, w: 50, h: 50})
         .color("white")
         .multiway(PLAYER_SPEED, {W: -90, S: 90, D: 0, A: 180});
-        
-      this.enemies = [];
-      this.targetEnemies = [];
       
+      this.enemies = [];
+      this.targetEnemyIndices = [];
+      this.typedNumber = "";
+
       this.bind("KeyDown", function(e) {
         if (e.key >= Crafty.keys['NUMPAD_0'] && e.key <= Crafty.keys['NUMPAD_9']) {
           var number = e.key - Crafty.keys['NUMPAD_0'];
-          var valid_enemy_indices = [];
-          var invalid_enemy_indices = [];
+          var validEnemyIndices = [];
+          var invalidEnemyIndices = [];
           
           // Go through and see if any of the targets are valid.
-          for (var i = this.targetEnemies.length - 1; i >= 0; i--) {
-            if (this.targetEnemies[i].tryDigit(number)) {
-              valid_enemy_indices.push(i);
+          for (var i = this.targetEnemyIndices.length - 1; i >= 0; i--) {
+            if (this.enemies[this.targetEnemyIndices[i]].tryDigit(number)) {
+              validEnemyIndices.push(this.targetEnemyIndices[i]);
             } else {
-              invalid_enemy_indices.push(i);
+              invalidEnemyIndices.push(this.targetEnemyIndices[i]);
             }
           }
-          
           // Go through and delete all of the targets that were not valid IF there is one or more valid targets
-          if (valid_enemy_indices.length >= 1) {
-            for (var i = invalid_enemy_indices.length - 1; i >= 0; i--) {
-              this.targetEnemies.splice(invalid_enemy_indices[i], 1);
+          if (validEnemyIndices.length >= 1) {
+            this.typedNumber += number;
+            for (var i = invalidEnemyIndices.length - 1; i >= 0; i--) {
+              this.targetEnemyIndices.splice(this.targetEnemyIndices.indexOf(invalidEnemyIndices[i]), 1);
             }
           }
         }
         else if (e.key == Crafty.keys['ENTER']) {
-          for (var i = this.targetEnemies.length - 1; i >= 0; i--) {
-            if (this.targetEnemies[i].checkIfNumberComplete()) {
-              for (var j = 0; j < this.enemies.length; j++) {
-                if (this.enemies[j] == this.targetEnemies[i]) {
-                  this.enemies.splice(j, 1);
-                }
-              }
-              this.targetEnemies[i].destroyEnemy();
+          this.typedNumber = "";
+          for (var i = this.targetEnemyIndices.length - 1; i >= 0; i--) {
+            if (this.enemies[this.targetEnemyIndices[i]].checkIfNumberComplete()) {
+              this.enemies[this.targetEnemyIndices[i]].destroyEnemy();
+              this.enemies.splice(this.targetEnemyIndices[i], 1);
             }
             else {
-              this.targetEnemies[i].resetCurDigitIndex();
+              this.enemies[this.targetEnemyIndices[i]].resetCurDigitIndex();
             }
           }
           
-          this.targetEnemies.length = 0;
+          this.targetEnemyIndices = [];
           for (var i = 0; i < this.enemies.length; i++) {
-            this.targetEnemies.push(this.enemies[i]);
+            this.targetEnemyIndices.push(i);
           }
         }
       });
     },
     
     spawnEnemy: function() {
-      this.enemies.push(Crafty.e("Enemy").difficulty(10));
+      this.enemies.push(Crafty.e("Enemy").difficulty(3));
     },
     
     startGame: function() {
       this.spawnEnemy();
       this.spawnEnemy();
-      this.targetEnemies.length = 0;
       for (var i = 0; i < this.enemies.length; i++) {
-        this.targetEnemies.push(this.enemies[i]);
+        this.targetEnemyIndices.push(i);
+      }
+    },
+
+    debug: function() {
+      console.log("Current Number:", this.typedNumber);
+      console.log("Enemies");
+      for (var i = 0; i < this.enemies.length; i++) {
+        console.log(this.enemies[i].number);
+      }
+      console.log("Target Enemies");
+      for (var i = 0; i < this.targetEnemyIndices.length; i++) {
+        console.log(this.enemies[this.targetEnemyIndices[i]].number);
       }
     }
   });
