@@ -310,7 +310,8 @@ window.onload = function() {
   
   Crafty.c("Number", {
     init: function() {
-      this.addComponent("2D, Color, DOM, Text, HTML");
+      this.addComponent("2D, Color, DOM, Text, HTML")
+      .attr({z: 10});
     }
   });
 
