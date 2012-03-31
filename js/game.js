@@ -5,8 +5,8 @@ window.onload = function() {
       HALF_VIEWPORT_HEIGHT      = VIEWPORT_HEIGHT / 2,
       PLAYER_SPEED              = 10,
       ENEMY_SPEED               = 1,
-      ENEMY_WIDTH               = 50,
-      ENEMY_HEIGHT              = 50,
+      ENEMY_WIDTH               = 100,
+      ENEMY_HEIGHT              = 100,
       NUMBER_FONT_SIZE          = 20,
       WORLD_WIDTH               = VIEWPORT_WIDTH * 3,
       WORLD_HEIGHT              = VIEWPORT_HEIGHT * 3,
@@ -216,10 +216,10 @@ window.onload = function() {
   Crafty.c("Enemy", {
     
     init: function() {
-      this.addComponent("2D, Color, DOM, Collision");
-      this.w = ENEMY_WIDTH;
-      this.h = ENEMY_HEIGHT;
-      this.color("red");
+      this.addComponent("2D, DOM, Collision, SpriteAnimation, EnemySprite")
+        .animate('EnemyWalk', 0, 0, 3)
+        .attr({w: ENEMY_WIDTH, h: ENEMY_HEIGHT});
+
       this.curDigitIndex = 0;
     },
 
@@ -316,6 +316,7 @@ window.onload = function() {
 
   Crafty.scene("loading", function() {
     Crafty.sprite(100, "img/hero.png", {PlayerSprite: [0, 0]});
+    Crafty.sprite(100, "img/enemy1.png", {EnemySprite: [0, 0]});
 
     Crafty.e("2D, Color, DOM, Text, Mouse")
       .attr({w: 300, h: 100, x: HALF_VIEWPORT_HEIGHT, y: HALF_VIEWPORT_HEIGHT})
