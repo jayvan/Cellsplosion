@@ -1,21 +1,20 @@
 window.onload = function() {
-  var WIDTH             = 800,
-      HEIGHT            = 600,
-      HALF_WIDTH        = WIDTH / 2,
-      HALF_HEIGHT       = HEIGHT / 2,
-      PLAYER_SPEED      = 25,
-      ENEMY_WIDTH       = 50,
-      ENEMY_HEIGHT      = 50,
-      NUMBER_FONT_SIZE  = 20,
-      WORLD_WIDTH       = WIDTH * 3,
-      WORLD_HEIGHT      = HEIGHT * 3,
-      FLOOR_TILE_WIDTH  = 200,
-      FLOOR_TILE_HEIGHT = 200,
-      WALL_SIZE         = 100,
-      PLAYER_WIDTH      = 50,
-      PLAYER_HEIGHT     = 50;
+  var VIEWPORT_WIDTH            = 800,
+      VIEWPORT_HEIGHT           = 600,
+      HALF_VIEWPORT_WIDTH       = VIEWPORT_WIDTH / 2,
+      HALF_VIEWPORT_HEIGHT      = VIEWPORT_HEIGHT / 2,
+      PLAYER_SPEED              = 25,
+      ENEMY_WIDTH               = 50,
+      ENEMY_HEIGHT              = 50,
+      NUMBER_FONT_SIZE          = 20,
+      WORLD_WIDTH               = VIEWPORT_WIDTH * 3,
+      WORLD_HEIGHT              = VIEWPORT_HEIGHT * 3,
+      WALL_SIZE                 = 100,
+      PLAYER_WIDTH              = 50,
+      PLAYER_HEIGHT             = 50,
+      INITIAL_ENEMY_COUNT       = 5;
 
-  Crafty.init(WIDTH, HEIGHT);
+  Crafty.init(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
   Crafty.background("grey");
   
   Crafty.c("World", {
@@ -76,15 +75,15 @@ window.onload = function() {
         if(!this.player) return;
         
         // position of the viewport
-        var vpx = (this.player._x - HALF_WIDTH),
-            vpy = (this.player._y - HALF_HEIGHT);
+        var vpx = (this.player._x - HALF_VIEWPORT_WIDTH),
+            vpy = (this.player._y - HALF_VIEWPORT_HEIGHT);
         
         // Max x in map * 32 - Crafty.viewport.width = 1164
-        if(vpx > 0 && vpx < WORLD_WIDTH - WIDTH) {
+        if(vpx > 0 && vpx < WORLD_WIDTH - VIEWPORT_WIDTH) {
           Crafty.viewport.x = -vpx;
         }
         
-        if(vpy > 0 && vpy < WORLD_HEIGHT - HEIGHT) {
+        if(vpy > 0 && vpy < WORLD_HEIGHT - VIEWPORT_HEIGHT) {
           Crafty.viewport.y = -vpy;
         }
 
@@ -104,12 +103,24 @@ window.onload = function() {
     },
     
     spawnEnemy: function() {
-      this.enemies.push(Crafty.e("Enemy").difficulty(3));
+      var x = 0,
+          y = 0;
+
+      do {
+        x = Crafty.math.randomInt(WALL_SIZE, WORLD_WIDTH - WALL_SIZE - ENEMY_WIDTH);
+        y = Crafty.math.randomInt(WALL_SIZE, WORLD_HEIGHT - WALL_SIZE - ENEMY_HEIGHT);
+      } while ( x >= Crafty.viewport.x - ENEMY_WIDTH &&
+                x <= Crafty.viewport.x + VIEWPORT_WIDTH &&
+                y >= Crafty.viewport.y - ENEMY_HEIGHT &&
+                y <= Crafty.viewport.y + VIEWPORT_HEIGHT );
+
+      this.enemies.push(Crafty.e("Enemy").difficulty(3).attr({x: x, y: y}));
     },
     
     startGame: function() {
-      this.spawnEnemy();
-      this.spawnEnemy();
+      for (var i = 0; i < INITIAL_ENEMY_COUNT; i++) {
+        this.spawnEnemy();
+      }
       for (var i = 0; i < this.enemies.length; i++) {
         this.targetEnemyIndices.push(i);
       }
@@ -139,8 +150,6 @@ window.onload = function() {
       this.addComponent("2D, Color, DOM");
       this.w = ENEMY_WIDTH;
       this.h = ENEMY_HEIGHT;
-      this.x = Math.random() * 700;
-      this.y = Math.random() * 500;
       this.color("red");
       this.curDigitIndex = 0;
     },
@@ -157,6 +166,7 @@ window.onload = function() {
           y: this.y - NUMBER_FONT_SIZE + 3,
           w: NUMBER_FONT_SIZE * this.number.length,
           h: NUMBER_FONT_SIZE });
+      this.attach(this.numberRef);
           
       return this;
     },

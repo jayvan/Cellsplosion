@@ -47,3 +47,4 @@ Typing:
 Spawning:
 =========
 - Spawn off screen always
+* Try viewport follow
