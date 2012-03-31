@@ -71,8 +71,6 @@ window.onload = function() {
       });
 
       this.bind("EnterFrame", function() {
-        this.setViewport();
-
         // Bounds check the player
         if (this.player.x < WALL_SIZE) {
           this.player.x = WALL_SIZE;
@@ -89,20 +87,7 @@ window.onload = function() {
     },
 
     setViewport: function() {
-      if(!this.player) return;
-      
-      // position of the viewport
-      var vpx = (this.player._x - HALF_VIEWPORT_WIDTH),
-          vpy = (this.player._y - HALF_VIEWPORT_HEIGHT);
-      
-      // Max x in map * 32 - Crafty.viewport.width = 1164
-      if(vpx > 0 && vpx < WORLD_WIDTH - VIEWPORT_WIDTH) {
-        Crafty.viewport.x = -vpx;
-      }
-      
-      if(vpy > 0 && vpy < WORLD_HEIGHT - VIEWPORT_HEIGHT) {
-        Crafty.viewport.y = -vpy;
-      }
+      Crafty.viewport.follow(this.player, 0, 0);
     },
     
     spawnEnemy: function() {
@@ -125,8 +110,6 @@ window.onload = function() {
 
       for (var i = 0; i < INITIAL_ENEMY_COUNT; i++) {
         this.spawnEnemy();
-      }
-      for (var i = 0; i < this.enemies.length; i++) {
         this.targetEnemyIndices.push(i);
       }
 
