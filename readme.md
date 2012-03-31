@@ -13,10 +13,12 @@ Why are these enemies attacking you?
 ====================================
 They are employees and executives of the Terobell.  They need to stop your "evil" plan!
 
+Essential Ideas:
+================
+- Moving AI
 
 Additional Ideas:
 =================
-- Moving AI
 - AoE damage radius
 - Enemies take "damage" by losing numbers
 - Objectives: assassination, certain number of enemies

@@ -11,3 +11,15 @@
 .typed {
   color: orange;
 }
+
+#cr-stage {
+  float: left;
+}
+
+#info-bar {
+  display: inline-block;
+  color: white;
+  width: 200px;
+  height: 600px;
+  background-color: black;
+}

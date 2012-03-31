@@ -23,6 +23,7 @@ window.onload = function() {
     init: function() {
 
       this.player = Crafty.e("Player");
+      this.score = 0;
       
       this.enemies = [];
       this.targetEnemyIndices = [];
@@ -44,7 +45,7 @@ window.onload = function() {
           }
           // Go through and delete all of the targets that were not valid IF there is one or more valid targets
           if (validEnemyIndices.length >= 1) {
-            this.typedNumber += number;
+            this.appendToTypedNumber(number);
             for (var i = invalidEnemyIndices.length - 1; i >= 0; i--) {
               this.enemies[invalidEnemyIndices[i]].resetCurDigitIndex();
               this.targetEnemyIndices.splice(this.targetEnemyIndices.indexOf(invalidEnemyIndices[i]), 1);
@@ -52,9 +53,11 @@ window.onload = function() {
           }
         }
         else if (e.key == Crafty.keys['ENTER']) {
-          this.typedNumber = "";
+          this.resetTypedNumber();
           for (var i = this.targetEnemyIndices.length - 1; i >= 0; i--) {
             if (this.enemies[this.targetEnemyIndices[i]].checkIfNumberComplete()) {
+              // TODO: Change hardcoded enemy kill score
+              this.addToScore(10);
               this.enemies[this.targetEnemyIndices[i]].destroyEnemy();
               this.enemies.splice(this.targetEnemyIndices[i], 1);
               this.spawnEnemy();
@@ -123,6 +126,21 @@ window.onload = function() {
       Crafty.e("2D, DOM, Image")
        .attr({w: WORLD_WIDTH, h: WORLD_HEIGHT, z: -1})
        .image(FLOOR_IMAGE, "repeat");
+    },
+
+    resetTypedNumber: function() {
+      this.typedNumber = "";
+      $('#currentNumber .num').text(this.typedNumber);
+    },
+
+    appendToTypedNumber: function(digit) {
+      this.typedNumber += digit;
+      $('#currentNumber .num').text(this.typedNumber);
+    },
+
+    addToScore: function(pointsToAdd) {
+      this.score += pointsToAdd;
+      $("#score .num").text(this.score);
     },
 
     debug: function() {
