@@ -3,7 +3,8 @@ window.onload = function() {
       VIEWPORT_HEIGHT           = 600,
       HALF_VIEWPORT_WIDTH       = VIEWPORT_WIDTH / 2,
       HALF_VIEWPORT_HEIGHT      = VIEWPORT_HEIGHT / 2,
-      PLAYER_SPEED              = 25,
+      PLAYER_SPEED              = 10,
+      ENEMY_SPEED               = 1,
       ENEMY_WIDTH               = 50,
       ENEMY_HEIGHT              = 50,
       NUMBER_FONT_SIZE          = 20,
@@ -12,7 +13,7 @@ window.onload = function() {
       WALL_SIZE                 = 100,
       PLAYER_WIDTH              = 50,
       PLAYER_HEIGHT             = 50,
-      INITIAL_ENEMY_COUNT       = 5,
+      INITIAL_ENEMY_COUNT       = 25,
       FLOOR_IMAGE               = 'img/floor.jpg';
 
   Crafty.init(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
@@ -71,6 +72,11 @@ window.onload = function() {
       });
 
       this.bind("EnterFrame", function() {
+        // Update all of the enemies
+        for (var i = 0; i < this.enemies.length; i++) {
+          this.enemies[i].update(this.player);
+        }
+
         // Bounds check the player
         if (this.player.x < WALL_SIZE) {
           this.player.x = WALL_SIZE;
@@ -155,6 +161,20 @@ window.onload = function() {
       this.color("red");
       this.curDigitIndex = 0;
     },
+
+    update: function(player) {
+      if (this.x > player.x) {
+        this.x -= ENEMY_SPEED;
+      } else if (this.x < player.x) {
+        this.x += ENEMY_SPEED;
+      }
+
+      if (this.y > player.y) {
+        this.y -= ENEMY_SPEED;
+      } else if (this.y < player.y) {
+        this.y += ENEMY_SPEED;
+      }
+    },
     
     difficulty: function(length) {
       this.number = "";
@@ -176,7 +196,7 @@ window.onload = function() {
     tryDigit: function(digit) {
       if (this.number[this.curDigitIndex] == digit) {
         this.curDigitIndex += 1;
-        this.numberRef.replace("<span class='typed'>" + this.number.slice(0,this.curDigitIndex) + "</span>" + this.number.slice(this.curDigitIndex));
+        this.numberRef.text("<span class='typed'>" + this.number.slice(0,this.curDigitIndex) + "</span>" + this.number.slice(this.curDigitIndex));
         return true;
       }
       return false;
@@ -190,7 +210,7 @@ window.onload = function() {
     },
     
     resetCurDigitIndex: function() {
-      this.numberRef.replace(this.number);
+      this.numberRef.text(this.number);
       this.curDigitIndex = 0;
     },
     
