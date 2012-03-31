@@ -10,11 +10,13 @@ window.onload = function() {
       NUMBER_FONT_SIZE          = 20,
       WORLD_WIDTH               = VIEWPORT_WIDTH * 3,
       WORLD_HEIGHT              = VIEWPORT_HEIGHT * 3,
-      WALL_SIZE                 = 100,
+      WALL_SIZE                 = 50,
       PLAYER_WIDTH              = 100,
       PLAYER_HEIGHT             = 100,
       INITIAL_ENEMY_COUNT       = 25,
-      FLOOR_IMAGE               = 'img/ground.gif';
+      FLOOR_IMAGE               = 'img/ground.gif',
+      WALL_HORIZONTAL_IMAGE     = 'img/wall_horizontal.gif',
+      WALL_VERTICAL_IMAGE       = 'img/wall_vertical.gif';
 
   Crafty.init(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
   Crafty.background("grey");
@@ -136,6 +138,26 @@ window.onload = function() {
       Crafty.e("2D, DOM, Image")
        .attr({w: WORLD_WIDTH, h: WORLD_HEIGHT, z: -1})
        .image(FLOOR_IMAGE, "repeat");
+
+      // Create the walls
+      // Left
+      Crafty.e("2D, DOM, Image")
+        .attr({w: WALL_SIZE, h: WORLD_HEIGHT, x: 0, y: 0})
+        .image(WALL_VERTICAL_IMAGE, "repeat")
+      // Right
+      Crafty.e("2D, DOM, Image")
+        .attr({w: WALL_SIZE, h: WORLD_HEIGHT, x: WORLD_WIDTH - WALL_SIZE, y: 0})
+        .image(WALL_VERTICAL_IMAGE, "repeat")
+        .flip("X")
+      // Bottom
+      Crafty.e("2D, DOM, Image")
+        .attr({w: WORLD_WIDTH, h: WALL_SIZE, x: 0, y: WORLD_HEIGHT - WALL_SIZE})
+        .image(WALL_HORIZONTAL_IMAGE, "repeat")
+        .flip("Y")
+      // Top
+      Crafty.e("2D, DOM, Image")
+        .attr({w: WORLD_WIDTH, h: WALL_SIZE, x: 0, y: 0})
+        .image(WALL_HORIZONTAL_IMAGE, "repeat");
     },
 
     resetTypedNumber: function() {
