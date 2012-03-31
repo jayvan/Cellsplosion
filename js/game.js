@@ -1,18 +1,28 @@
 window.onload = function() {
   var WIDTH             = 800,
       HEIGHT            = 600,
-      PLAYER_SPEED      = 3,
+      HALF_WIDTH        = WIDTH / 2,
+      HALF_HEIGHT       = HEIGHT / 2,
+      PLAYER_SPEED      = 25,
       ENEMY_WIDTH       = 50,
       ENEMY_HEIGHT      = 50,
-      NUMBER_FONT_SIZE  = 20;
+      NUMBER_FONT_SIZE  = 20,
+      WORLD_WIDTH       = WIDTH * 3,
+      WORLD_HEIGHT      = HEIGHT * 3,
+      FLOOR_TILE_WIDTH  = 200,
+      FLOOR_TILE_HEIGHT = 200,
+      WALL_SIZE         = 100,
+      PLAYER_WIDTH      = 50,
+      PLAYER_HEIGHT     = 50;
 
   Crafty.init(WIDTH, HEIGHT);
   Crafty.background("grey");
   
   Crafty.c("World", {
     init: function() {
+
       this.player = Crafty.e("2D, Color, DOM, Multiway")
-        .attr({x: 400, y: 300, w: 50, h: 50})
+        .attr({x: 400, y: 300, w: PLAYER_WIDTH, h: PLAYER_HEIGHT, z: 5})
         .color("white")
         .multiway(PLAYER_SPEED, {W: -90, S: 90, D: 0, A: 180});
       
@@ -61,6 +71,36 @@ window.onload = function() {
           }
         }
       });
+
+      this.bind("EnterFrame", function() {
+        if(!this.player) return;
+        
+        // position of the viewport
+        var vpx = (this.player._x - HALF_WIDTH),
+            vpy = (this.player._y - HALF_HEIGHT);
+        
+        // Max x in map * 32 - Crafty.viewport.width = 1164
+        if(vpx > 0 && vpx < WORLD_WIDTH - WIDTH) {
+          Crafty.viewport.x = -vpx;
+        }
+        
+        if(vpy > 0 && vpy < WORLD_HEIGHT - HEIGHT) {
+          Crafty.viewport.y = -vpy;
+        }
+
+        // Bounds check the player
+        if (this.player.x < WALL_SIZE) {
+          this.player._x = WALL_SIZE;
+        } else if (this.player.x > WORLD_WIDTH - WALL_SIZE - PLAYER_WIDTH) {
+          this.player._x = WORLD_WIDTH - WALL_SIZE - PLAYER_WIDTH;
+        }
+        
+        if (this.player.y < WALL_SIZE) {
+          this.player._y = WALL_SIZE;
+        } else if (this.player.y > WORLD_HEIGHT - WALL_SIZE - PLAYER_HEIGHT) {
+          this.player._y = WORLD_HEIGHT - WALL_SIZE - PLAYER_HEIGHT;
+        }
+      });
     },
     
     spawnEnemy: function() {
@@ -73,6 +113,11 @@ window.onload = function() {
       for (var i = 0; i < this.enemies.length; i++) {
         this.targetEnemyIndices.push(i);
       }
+
+      // Create the floor
+      Crafty.e("2D, DOM, Image")
+       .attr({w: WORLD_WIDTH, h: WORLD_HEIGHT, z: -1})
+       .image("img/floor.jpg", "repeat");
     },
 
     debug: function() {
