@@ -1,3 +1,7 @@
+* {
+  line-height: normal !important;
+}
+
 .Number {
   color: blue;
   text-align: center;

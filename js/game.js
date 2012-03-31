@@ -19,11 +19,19 @@ window.onload = function() {
   Crafty.init(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
   Crafty.background("grey");
   
+  var score;
+  // Load high score
+  var highScore = localStorage.getItem("highScore");
+
+  if (highScore == null) {
+    highScore = 0;
+  }
+
   Crafty.c("World", {
     init: function() {
+      score = 0;
 
       this.player = Crafty.e("Player");
-      this.score = 0;
       
       this.enemies = [];
       this.targetEnemyIndices = [];
@@ -93,6 +101,8 @@ window.onload = function() {
           this.player.y = WORLD_HEIGHT - WALL_SIZE - PLAYER_HEIGHT;
         }
       });
+
+      this.startGame();
     },
 
     setViewport: function() {
@@ -139,8 +149,8 @@ window.onload = function() {
     },
 
     addToScore: function(pointsToAdd) {
-      this.score += pointsToAdd;
-      $("#score .num").text(this.score);
+      score += pointsToAdd;
+      $("#score .num").text(score);
     },
 
     debug: function() {
@@ -166,7 +176,11 @@ window.onload = function() {
     },
 
     die: function() {
-      console.log("die!!!");
+      highScore = Math.max(highScore, score);
+      if (score == highScore) {
+        localStorage.setItem("highScore", highScore);
+      }
+      Crafty.scene("gameOver");
     }
   });
   
@@ -243,6 +257,44 @@ window.onload = function() {
       this.addComponent("2D, Color, DOM, Text, HTML");
     }
   });
+
+  Crafty.scene("main", function() {
+    Crafty.e("World");
+  });
+
+  Crafty.scene("gameOver", function() {
+    Crafty.viewport.x = 0;
+    Crafty.viewport.y = 0;
+    var gameOverText = "";
+
+    if (score == 0 && highScore == 0) {
+      gameOverText = "Wow, I'm so impressed. You couldn't even beat your massive high score of ZERO. Loser."
+    } else if (score == highScore) {
+      gameOverText = "Hey, you beat your high score. Now why don't you do something meaningful."
+    } else if (score < highScore) {
+      gameOverText = "Gosh, you did pretty well for a person who sucks at games."
+    }
+
+    Crafty.e("2D, Color, DOM, Text, Mouse")
+      .attr({w: 300, h: 100, x: HALF_VIEWPORT_HEIGHT, y: HALF_VIEWPORT_HEIGHT})
+      .color("red")
+      .text("Score: " + score + ". High score: " + highScore + ". " + gameOverText)
+      .bind("MouseDown", function(e) {
+        console.log("CLICKED");
+        Crafty.scene("main");
+      });
+  });
+
+  Crafty.scene("loading", function() {
+    Crafty.e("2D, Color, DOM, Text, Mouse")
+      .attr({w: 300, h: 100, x: HALF_VIEWPORT_HEIGHT, y: HALF_VIEWPORT_HEIGHT})
+      .color("green")
+      .text("Start")
+      .bind("MouseDown", function(e) {
+        Crafty.scene("main");
+      });
+  });
   
-  Crafty.e("World").startGame();
+  Crafty.scene("loading");
+  
 };
