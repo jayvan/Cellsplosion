@@ -3,7 +3,7 @@ window.onload = function() {
       VIEWPORT_HEIGHT           = 600,
       HALF_VIEWPORT_WIDTH       = VIEWPORT_WIDTH / 2,
       HALF_VIEWPORT_HEIGHT      = VIEWPORT_HEIGHT / 2,
-      PLAYER_SPEED              = 10,
+      PLAYER_SPEED              = 5,
       ENEMY_SPEED               = 1,
       ENEMY_WIDTH               = 100,
       ENEMY_HEIGHT              = 100,
@@ -145,7 +145,6 @@ window.onload = function() {
 
     appendToTypedNumber: function(digit) {
       this.typedNumber += digit.toString();
-      console.log(this.typedNumber);
       $('#currentNumber .num').text(this.typedNumber);
     },
 
@@ -169,15 +168,13 @@ window.onload = function() {
 
   Crafty.c("Player", {
     init: function() {
-      this.addComponent("2D, Color, DOM, Multiway, Collision, SpriteAnimation, PlayerSprite")
+      this.addComponent("2D, DOM, Multiway, Collision, SpriteAnimation, PlayerSprite")
         .attr({x: WORLD_WIDTH / 2, y: WORLD_HEIGHT / 2, w: PLAYER_WIDTH, h: PLAYER_HEIGHT, z: 5})
         .origin(PLAYER_WIDTH / 2, PLAYER_HEIGHT / 2)
-        .color("white")
         .multiway(PLAYER_SPEED, {W: -90, S: 90, D: 0, A: 180})
         .animate('PlayerWalk', 0, 0, 3)
         .collision().onHit("Enemy", this.die)
         .bind("NewDirection", function(direction) {
-          console.log("New Direction:", direction.x, direction.y);
           if (direction.x == 0 && direction.y == 0) {
             this.stop();
           } else if (!this.isPlaying('PlayerWalk')) {
@@ -218,7 +215,9 @@ window.onload = function() {
     init: function() {
       this.addComponent("2D, DOM, Collision, SpriteAnimation, EnemySprite")
         .animate('EnemyWalk', 0, 0, 3)
-        .attr({w: ENEMY_WIDTH, h: ENEMY_HEIGHT});
+        .animate('EnemyWalk', 30, -1)
+        .attr({w: ENEMY_WIDTH, h: ENEMY_HEIGHT})
+        .origin(ENEMY_WIDTH / 2, ENEMY_HEIGHT / 2);
 
       this.curDigitIndex = 0;
     },
@@ -235,6 +234,12 @@ window.onload = function() {
       } else if (this.y < player.y) {
         this.y += ENEMY_SPEED;
       }
+
+      direction = {
+        x: player.x - this.x,
+        y: player.y - this.y
+      }
+      this.rotation = Math.atan2(direction.y, direction.x) * 180 / Math.PI + 90;
     },
     
     difficulty: function(length) {
@@ -309,7 +314,6 @@ window.onload = function() {
       .color("red")
       .text("Score: " + score + ". High score: " + highScore + ". " + gameOverText)
       .bind("MouseDown", function(e) {
-        console.log("CLICKED");
         Crafty.scene("main");
       });
   });
