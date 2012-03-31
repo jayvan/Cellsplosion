@@ -5,7 +5,9 @@
 * Copyright 2010, Louis Stowasser
 * Dual licensed under the MIT or GPL licenses.
 */
- (function (window, undefined) {
+
+
+(function (window, undefined) {
 
 	/**@
 * #Crafty
@@ -45,12 +47,18 @@
 	handlers = {}, //global event handlers
 	onloads = [], //temporary storage of onload handlers
 	tick,
-	tickID,
+
+	/*
+  * `window.requestAnimationFrame` or its variants is called for animation.
+	* `.requestID` keeps a record of the return value previous `window.requestAnimationFrame` call.
+  * This is an internal variable. Used to stop frame.
+	*/
+	requestID,
 
 	noSetter,
 
 	loops = 0,
-	skipTicks = 1000 / FPS,
+  milliSecPerFrame = 1000 / FPS,
 	nextGameTick = (new Date).getTime(),
 
 	slice = Array.prototype.slice,
@@ -777,7 +785,8 @@
 				if (onFrame) {
 					tick = function () {
 						Crafty.timer.step();
-						tickID = onFrame(tick);
+						requestID = onFrame(tick);
+						//console.log(requestID + ', ' + frame)
 					}
 
 					tick();
@@ -798,7 +807,7 @@
 					window.msCancelRequestAnimationFrame ||
 					null;
 
-				if (onFrame) onFrame(tickID);
+				if (onFrame) onFrame(requestID);
 				tick = null;
 			},
 
@@ -811,12 +820,12 @@
 			step: function () {
 				loops = 0;
 				this.curTime = Date.now();
-				if (this.curTime - nextGameTick > 60 * skipTicks) {
-					nextGameTick = this.curTime - skipTicks;
+				if (this.curTime - nextGameTick > 60 * milliSecPerFrame) {
+					nextGameTick = this.curTime - milliSecPerFrame;
 				}
 				while (this.curTime > nextGameTick) {
 					Crafty.trigger("EnterFrame", { frame: frame++ });
-					nextGameTick += skipTicks;
+					nextGameTick += milliSecPerFrame;
 					loops++;
 				}
 				if (loops) {
@@ -1129,9 +1138,13 @@
 	//make Crafty global
 	window.Crafty = Crafty;
 })(window);
- //wrap around components
+
+
+//wrap around components
 (function(Crafty, window, document) {
- /**
+
+
+/**
 * Spatial HashMap for broad phase collision
 *
 * @author Louis Stowasser
@@ -1409,7 +1422,9 @@
 
 	parent.HashMap = HashMap;
 })(Crafty);
- /**@
+
+
+/**@
 * #Crafty.map
 * @category 2D
 * Functions related with quering entities. 
@@ -2459,7 +2474,9 @@ Crafty.matrix.prototype = {
 		return this.mtx[row - 1][col - 1];
 	}
 }
- /**@
+
+
+/**@
 * #Collision
 * @category 2D
 * Component to detect collision between any two convex polygons.
@@ -2729,7 +2746,9 @@ Crafty.c("Collision", {
 		return { overlap: MTV2, normal: MN };
 	}
 });
- /**@
+
+
+/**@
 * #DOM
 * @category Graphics
 * Draws entities as DOM nodes, specifically `<DIV>`s.
@@ -3079,7 +3098,9 @@ Crafty.extend({
 		}
 	}
 });
- /**@
+
+
+/**@
 * #Crafty.support
 * @category Misc, Core
 * Determines feature support for what Crafty can do.
@@ -3431,7 +3452,8 @@ Crafty.extend({
 		 * shifting everything in the viewport 500 pixels to the left.
 		 */
 		scroll: function (axis, v) {
-			var change = Math.floor(v - this[axis]), //change in direction
+			v = Math.floor(v);
+			var change = v - this[axis], //change in direction
 				context = Crafty.canvas.context,
 				style = Crafty.stage.inner.style,
 				canvas;
@@ -3444,7 +3466,7 @@ Crafty.extend({
 				if (context) context.translate(0, change);
 			}
 			if (context) Crafty.DrawManager.drawAll();
-			style[axis == '_x' ? "left" : "top"] = Math.round(~~v) + "px";
+			style[axis == '_x' ? "left" : "top"] = v + "px";
 		},
 
 		rect: function () {
@@ -4133,7 +4155,9 @@ Crafty.c("viewport", {
 		});
 	}
 });
- /**@
+
+
+/**@
 * #Canvas
 * @category Graphics
 * Draws itself onto a canvas. Crafty.canvas.init() will be automatically called it is not called already (hence the canvas element dosen't exist).
@@ -4210,7 +4234,18 @@ Crafty.c("Canvas", {
 
 			context.rotate((this._rotation % 360) * (Math.PI / 180));
 		}
-
+		
+		if(this._flipX || this._flipY) {
+			context.save();
+			context.scale((this._flipX ? -1 : 1), (this._flipY ? -1 : 1));
+			if(this._flipX) {
+				pos._x = -(pos._x + pos._w)
+			}
+			if(this._flipY) {
+				pos._y = -(pos._y + pos._h)
+			}
+		}
+		
 		//draw with alpha
 		if (this._alpha < 1.0) {
 			var globalpha = context.globalAlpha;
@@ -4219,7 +4254,7 @@ Crafty.c("Canvas", {
 
 		this.trigger("Draw", { type: "canvas", pos: pos, co: co, ctx: context });
 
-		if (this._mbr) {
+		if (this._mbr || (this._flipX || this._flipY)) {
 			context.restore();
 		}
 		if (globalpha) {
@@ -4283,7 +4318,9 @@ Crafty.extend({
 		}
 	}
 });
- Crafty.extend({
+
+
+Crafty.extend({
 	over: null, //object mouseover, waiting for out
 	mouseObjs: 0,
 	mousePos: {},
@@ -4994,7 +5031,9 @@ Crafty.c("Twoway", {
 		return this;
 	}
 });
- /**@
+
+
+/**@
 * #SpriteAnimation
 * @category Animation
 * Used to animate sprites by changing the sprites in the sprite map.
@@ -5002,9 +5041,22 @@ Crafty.c("Twoway", {
 * @trigger Change - On each frame
 */
 Crafty.c("SpriteAnimation", {
+	/**@
+	* #._reels
+	* @comp SpriteAnimation
+	*
+	* A map consists of arrays that contains the coordinates of each frame within the sprite, e.g.,
+  * `{"walk_left":[[96,48],[112,48],[128,48]]}`
+	*/
 	_reels: null,
 	_frame: null,
-	_current: null,
+	/**@
+	* #._currentReelId
+	* @comp SpriteAnimation
+	*
+	* The current playing reel (one element of `this._reels`). It is `null` if no reel is playing.
+	*/
+	_currentReelId: null,
 
 	init: function () {
 		this._reels = {};
@@ -5013,17 +5065,17 @@ Crafty.c("SpriteAnimation", {
 	/**@
 	* #.animate
 	* @comp SpriteAnimation
-	* @sign public this .animate(String id, Number fromX, Number y, Number toX)
-	* @param id - ID of the animation reel being created
-	* @param fromX - Starting `x` position on the sprite map
-	* @param y - `y` position on the sprite map. Will remain constant through the animation.
-	* @param toX - End `x` position on the sprite map
-	* @sign public this .animate(String id, Array frames)
-	* @param id - ID of the animation reel being created
+	* @sign public this .animate(String reelId, Number fromX, Number y, Number toX)
+	* @param reelId - ID of the animation reel being created
+	* @param fromX - Starting `x` position (in the unit of sprite horizontal size) on the sprite map
+	* @param y - `y` position on the sprite map (in the unit of sprite vertical size). Remains constant through the animation.
+	* @param toX - End `x` position on the sprite map (in the unit of sprite horizontal size)
+	* @sign public this .animate(String reelId, Array frames)
+	* @param reelId - ID of the animation reel being created
 	* @param frames - Array of arrays containing the `x` and `y` values: [[x1,y1],[x2,y2],...]
-	* @sign public this .animate(String id, Number duration[, Number repeatCount])
-	* @param id - ID of the animation reel to play
-	* @param duration - Play the animation with a duration (in frames)
+	* @sign public this .animate(String reelId, Number duration[, Number repeatCount])
+	* @param reelId - ID of the animation reel to play
+	* @param duration - Play the animation within a duration (in frames)
 	* @param repeatCount - number of times to repeat the animation. Use -1 for infinitely
 	*
 	* Method to setup animation reels or play pre-made reels. Animation works by changing the sprites over
@@ -5046,26 +5098,31 @@ Crafty.c("SpriteAnimation", {
 	*     .animate('PlayerRunning', 0, 0, 3) //setup animation
 	*     .animate('PlayerRunning', 15, -1) // start animation
 	*
+	* Crafty.e("2D, DOM, SpriteAnimation, PlayerSprite")
+	*     .animate('PlayerRunning', 0, 3, 0) //setup animation
+	*     .animate('PlayerRunning', 15, -1) // start animation
 	* ~~~
 	*
 	* @see crafty.sprite
 	*/
-	animate: function (id, fromx, y, tox) {
+	animate: function (reelId, fromx, y, tox) {
 		var reel, i, tile, tileh, duration, pos;
 
 		//play a reel
+	  //.animate('PlayerRunning', 15, -1) // start animation
 		if (arguments.length < 4 && typeof fromx === "number") {
-			//make sure not currently animating
-			this._current = id;
-
-			reel = this._reels[id];
 			duration = fromx;
 
+			//make sure not currently animating
+			this._currentReelId = reelId;
+
+			currentReel = this._reels[reelId];
+
 			this._frame = {
-				reel: reel, //reel to play
-				frameTime: Math.ceil(duration / reel.length), //number of frames inbetween slides
-				frame: 0, //current slide/frame
-				current: 0,
+				currentReel: currentReel,
+				numberOfFramesBetweenSlides: Math.ceil(duration / currentReel.length),
+				currentSlideNumber: 0,
+				frameNumberBetweenSlides: 0,
 				repeat: 0
 			};
 			if (arguments.length === 3 && typeof y === "number") {
@@ -5074,19 +5131,21 @@ Crafty.c("SpriteAnimation", {
 				else this._frame.repeat = y;
 			}
 
-			pos = this._frame.reel[0];
+			pos = this._frame.currentReel[0];
 			this.__coord[0] = pos[0];
 			this.__coord[1] = pos[1];
 
-			this.bind("EnterFrame", this.drawFrame);
+			this.bind("EnterFrame", this.updateSprite);
 			return this;
 		}
+	  // .animate('PlayerRunning', 0, 0, 3) //setup animation
 		if (typeof fromx === "number") {
-			i = fromx;
-			reel = [];
-			tile = this.__tile;
-			tileh = this.__tileh;
+      // Defind in Sprite component.
+			tile = this.__tile  + parseInt(this.__padding[0] || 0, 10);
+			tileh = this.__tileh + parseInt(this.__padding[1] || 0, 10);
 
+			reel = [];
+			i = fromx;
 			if (tox > fromx) {
 				for (; i <= tox; i++) {
 					reel.push([i * tile, y * tileh]);
@@ -5097,45 +5156,60 @@ Crafty.c("SpriteAnimation", {
 				}
 			}
 
-			this._reels[id] = reel;
+			this._reels[reelId] = reel;
 		} else if (typeof fromx === "object") {
+	  // @sign public this .animate(reelId, [[x1,y1],[x2,y2],...])
 			i = 0;
 			reel = [];
 			tox = fromx.length - 1;
-			tile = this.__tile;
-			tileh = this.__tileh;
+			tile = this.__tile  + parseInt(this.__padding[0] || 0, 10);
+			tileh = this.__tileh + parseInt(this.__padding[1] || 0, 10);
 
 			for (; i <= tox; i++) {
 				pos = fromx[i];
 				reel.push([pos[0] * tile, pos[1] * tileh]);
 			}
 
-			this._reels[id] = reel;
+			this._reels[reelId] = reel;
 		}
 
 		return this;
 	},
 
-	drawFrame: function (e) {
+	/**@
+	* #.updateSprite
+	* @comp SpriteAnimation
+	* @sign private void .updateSprite()
+	*
+	* This is called at every `EnterFrame` event when `.animate()` enables animation. It update the SpriteAnimation component when the slide in the sprite should be updated.
+	*
+	* @example
+	* ~~~
+	* this.bind("EnterFrame", this.updateSprite);
+	* ~~~
+	*
+	* @see crafty.sprite
+	*/
+	updateSprite: function () {
 		var data = this._frame;
 
-		if (this._frame.current++ === data.frameTime) {
-			var pos = data.reel[data.frame++];
+		if (this._frame.frameNumberBetweenSlides++ === data.numberOfFramesBetweenSlides) {
+			var pos = data.currentReel[data.currentSlideNumber++];
 
 			this.__coord[0] = pos[0];
 			this.__coord[1] = pos[1];
-			this._frame.current = 0;
+			this._frame.frameNumberBetweenSlides = 0;
 		}
 
 
-		if (data.frame === data.reel.length && this._frame.current === data.frameTime) {
-			data.frame = 0;
+		if (data.currentSlideNumber === data.currentReel.length) {
+			data.currentSlideNumber = 0;
 			if (this._frame.repeatInfinitly === true || this._frame.repeat > 0) {
 				if (this._frame.repeat) this._frame.repeat--;
-				this._frame.current = 0;
-				this._frame.frame = 0;
+				this._frame.frameNumberBetweenSlides = 0;
+				this._frame.currentSlideNumber = 0;
 			} else {
-				this.trigger("AnimationEnd", { reel: data.reel });
+				this.trigger("AnimationEnd", { reel: data.currentReel });
 				this.stop();
 				return;
 			}
@@ -5151,9 +5225,9 @@ Crafty.c("SpriteAnimation", {
 	* Stop any animation currently playing.
 	*/
 	stop: function () {
-		this.unbind("EnterFrame", this.drawFrame);
+		this.unbind("EnterFrame", this.updateSprite);
 		this.unbind("AnimationEnd");
-		this._current = null;
+		this._currentReelId = null;
 		this._frame = null;
 
 		return this;
@@ -5168,7 +5242,7 @@ Crafty.c("SpriteAnimation", {
 	reset: function () {
 		if (!this._frame) return this;
 
-		var co = this._frame.reel[0];
+		var co = this._frame.currentReel[0];
 		this.__coord[0] = co[0];
 		this.__coord[1] = co[1];
 		this.stop();
@@ -5179,8 +5253,8 @@ Crafty.c("SpriteAnimation", {
 	/**@
 	* #.isPlaying
 	* @comp SpriteAnimation
-	* @sign public Boolean .isPlaying([String id])
-	* @param id - Determine if the animation reel with this ID is playing
+	* @sign public Boolean .isPlaying([String reelId])
+	* @param reelId - Determine if the animation reel with this reelId is playing
 	* Determines if an animation is currently playing. If a reel is passed, it will determine
 	* if the passed reel is playing.
 	* ~~~
@@ -5188,9 +5262,9 @@ Crafty.c("SpriteAnimation", {
 	* myEntity.isPlaying('PlayerRunning') //is the PlayerRunning animation playing
 	* ~~~
 	*/
-	isPlaying: function (id) {
-		if (!id) return !!this._interval;
-		return this._current === id;
+	isPlaying: function (reelId) {
+		if (!reelId) return !!this._interval;
+		return this._currentReelId === reelId;
 	}
 });
 
@@ -5277,7 +5351,9 @@ function tweenEnterFrame(e) {
 	}
 }
 
- /**@
+
+
+/**@
 * #Sprite
 * @category Graphics
 * @trigger Change - when the sprites change
@@ -5285,12 +5361,24 @@ function tweenEnterFrame(e) {
 */
 Crafty.c("Sprite", {
 	__image: '',
+	/*
+	* #.__tile
+	* @comp Sprite
+	*
+	* Horizontal sprite tile size.
+	*/
 	__tile: 0,
+	/*
+	* #.__tileh
+	* @comp Sprite
+	*
+	* Vertical sprite tile size.
+	*/
 	__tileh: 0,
 	__padding: null,
 	__trim: null,
 	img: null,
-  //ready is changed to true in Crafty.sprite
+	//ready is changed to true in Crafty.sprite
 	ready: false,
 
 	init: function () {
@@ -5341,6 +5429,13 @@ Crafty.c("Sprite", {
 	* 	.sprite(0, 0, 2, 2);
 	* ~~~
 	*/
+
+	/**@
+	* #.__coord
+	* @comp Sprite
+	*
+	* The coordinate of the slide within the sprite in the format of [x, y, w, h].
+	*/
 	sprite: function (x, y, w, h) {
 		this.__coord = [x * this.__tile + this.__padding[0] + this.__trim[0],
 						y * this.__tileh + this.__padding[1] + this.__trim[1],
@@ -5388,7 +5483,9 @@ Crafty.c("Sprite", {
 		return this;
 	}
 });
- /**@
+
+
+/**@
 * #Color
 * @category Graphics
 * Draw a solid color for the entity
@@ -5966,7 +6063,9 @@ Crafty.DrawManager = (function () {
 		}
 	};
 })();
- Crafty.extend({
+
+
+Crafty.extend({
     /**@
 * #Crafty.isometric
 * @category 2D
@@ -6124,7 +6223,9 @@ Crafty.DrawManager = (function () {
             };
         } 
     }
-}); /**@
+});
+
+/**@
 * #Particles
 * @category Graphics
 * Based on Parcycle by Mr. Speaker, licensed under the MIT, Ported by Leo Koppelkamm
@@ -6433,7 +6534,9 @@ Crafty.c("particles", {
 			}
 		}
 	}
-}); Crafty.extend({
+});
+
+Crafty.extend({
 /**@
 	* #Crafty.audio
 	* @category Audio
@@ -6731,7 +6834,9 @@ Crafty.c("particles", {
 				}
 			});
 })();
- /**@
+
+
+/**@
 * #HTML
 * @category Graphics
 * Component allow for insertion of arbitrary HTML into an entity
@@ -6805,7 +6910,9 @@ Crafty.c("HTML", {
 		this._element.innerHTML = new_html + this.inner;
 		return this;
 	}
-}); /**@
+});
+
+/**@
  * #Storage
  * @category Utilities
  * Utility to allow data to be saved to a permanent storage solution: IndexedDB, WebSql, localstorage or cookies
@@ -7100,7 +7207,7 @@ Crafty.storage = (function () {
 				// get all the timestamps for existing keys
 				function getTimestamps() {
 					try {
-						var trans = db.transaction(['save'], IDBTransaction.READ, 0),
+						var trans = db.transaction(['save'], IDBTransaction.READ),
 						store = trans.objectStore('save'),
 						request = store.getAll();
 						request.onsuccess = function (e) {
@@ -7135,7 +7242,7 @@ Crafty.storage = (function () {
 				var str = serialize(data), t = ts();
 				if (type == 'save')	saveExternal(key, str, t);
 				try {
-					var trans = db.transaction([type], IDBTransaction.READ_WRITE, 0),
+					var trans = db.transaction([type], IDBTransaction.READ_WRITE),
 					store = trans.objectStore(type),
 					request = store.put({
 						"data": str,
@@ -7144,6 +7251,7 @@ Crafty.storage = (function () {
 					});
 				}
 				catch (e) {
+					console.error(e);
 				}
 			},
 
@@ -7153,7 +7261,7 @@ Crafty.storage = (function () {
 					return;
 				}
 				try {
-					var trans = db.transaction([type], IDBTransaction.READ, 0),
+					var trans = db.transaction([type], IDBTransaction.READ),
 					store = trans.objectStore(type),
 					request = store.get(key);
 					request.onsuccess = function (e) {
@@ -7161,6 +7269,7 @@ Crafty.storage = (function () {
 					};
 				}
 				catch (e) {
+					console.error(e);
 				}
 			},
 
@@ -7169,7 +7278,7 @@ Crafty.storage = (function () {
 					setTimeout(function () { Crafty.storage.getAllkeys(type, callback); }, 1);
 				}
 				try {
-					var trans = db.transaction([type], IDBTransaction.READ, 0),
+					var trans = db.transaction([type], IDBTransaction.READ),
 					store = trans.objectStore(type),
 					request = store.getCursor(),
 					res = [];
@@ -7186,6 +7295,7 @@ Crafty.storage = (function () {
 					};
 				}
 				catch (e) {
+					console.error(e);
 				}
 			},
 
@@ -7386,7 +7496,9 @@ Crafty.storage = (function () {
 		load: function (key, type, callback) {
 		},
 	}*/
-})(); /**@
+})();
+
+/**@
 * #Text
 * @category Graphics
 * @trigger Change - when the text is changed
@@ -7536,7 +7648,9 @@ Crafty.c("Text", {
 		return this;
 	}
 });
- Crafty.extend({
+
+
+Crafty.extend({
 /**@
 	* #Crafty.assets
 	* @category Assets
@@ -7827,7 +7941,9 @@ Crafty.c("Text", {
 		});
 	}
 });
- /**@
+
+
+/**@
 * #Crafty.math
 * @category 2D
 * Static functions.
@@ -7960,7 +8076,7 @@ Crafty.math = {
 	 * Returns a random element of a specific array.
      */
 	randomElementOfArray: function (array) {
-		return array[array.length * Math.random()];
+		return array[Math.floor(array.length * Math.random())];
 	},
 
 	/**@
@@ -8832,69 +8948,7 @@ Crafty.math.Matrix2D = (function () {
 
 	return Matrix2D;
 })();
- /**@
-* #.delay
-* @comp Crafty Time
-* @sign public this.delay(Function callback, Number delay)
-* @param callback - Method to execute after given amount of milliseconds
-* @param delay - Amount of milliseconds to execute the method
-* The delay method will execute a function after a given amount of time in milliseconds.
-* 
-* It is not a wrapper for `setTimeout`.
-* 
-* If Crafty is paused, the delay is interrupted with the pause and then resume when unpaused
-*
-* If the entity is destroyed, the delay is also destroyed and will not have effect. 
-*
-* @example
-* ~~~
-* console.log("start");
-* this.delay(function() {
-     console.log("100ms later");
-* }, 100);
-* ~~~
-*/
-Crafty.c("Delay", {
-	init : function() {
-		this._delays = [];
-		this.bind("EnterFrame", function() {
-			var now = new Date().getTime();
-			for(var index in this._delays) {
-				var item = this._delays[index];
-				if(!item.triggered && item.start + item.delay + item.pause < now) {
-					item.triggered=true;
-					item.func.call(this);
-				}
-			}
-		});
-		this.bind("Pause", function() {
-			var now = new Date().getTime();
-			for(var index in this._delays) {
-				this._delays[index].pauseBuffer = now;
-			}
-		});
-		this.bind("Unpause", function() {
-			var now = new Date().getTime();
-			for(var index in this._delays) {
-				var item = this._delays[index];
-				item.pause += now-item.pauseBuffer;
-			}
-		});
-	},
-	/**@
-     * Set a new delay.
-     * @param func the callback function
-     * @param delay the delay in ms
-     */
-	delay : function(func, delay) {
-		return this._delays.push({
-			start : new Date().getTime(),
-			func : func,
-			delay : delay,
-			triggered : false,
-			pauseBuffer: 0,
-			pause: 0
-		});
-	}
-});
- })(Crafty,window,window.document);
+
+
+})(Crafty,window,window.document);
+

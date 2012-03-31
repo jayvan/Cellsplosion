@@ -11,10 +11,10 @@ window.onload = function() {
       WORLD_WIDTH               = VIEWPORT_WIDTH * 3,
       WORLD_HEIGHT              = VIEWPORT_HEIGHT * 3,
       WALL_SIZE                 = 100,
-      PLAYER_WIDTH              = 50,
-      PLAYER_HEIGHT             = 50,
+      PLAYER_WIDTH              = 100,
+      PLAYER_HEIGHT             = 100,
       INITIAL_ENEMY_COUNT       = 25,
-      FLOOR_IMAGE               = 'img/floor.jpg';
+      FLOOR_IMAGE               = 'img/ground.gif';
 
   Crafty.init(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
   Crafty.background("grey");
@@ -168,10 +168,12 @@ window.onload = function() {
 
   Crafty.c("Player", {
     init: function() {
-      this.addComponent("2D, Color, DOM, Multiway, Collision")
+      this.addComponent("2D, Color, DOM, Multiway, Collision, SpriteAnimation, PlayerSprite")
         .attr({x: WORLD_WIDTH / 2, y: WORLD_HEIGHT / 2, w: PLAYER_WIDTH, h: PLAYER_HEIGHT, z: 5})
         .color("white")
         .multiway(PLAYER_SPEED, {W: -90, S: 90, D: 0, A: 180})
+        .animate('PlayerWalk', 0, 0, 3)
+        .animate('PlayerWalk', 30, -1)
         .collision().onHit("Enemy", this.die);
     },
 
@@ -286,6 +288,8 @@ window.onload = function() {
   });
 
   Crafty.scene("loading", function() {
+    Crafty.sprite(100, "img/hero.png", {PlayerSprite: [0, 0]});
+
     Crafty.e("2D, Color, DOM, Text, Mouse")
       .attr({w: 300, h: 100, x: HALF_VIEWPORT_HEIGHT, y: HALF_VIEWPORT_HEIGHT})
       .color("green")

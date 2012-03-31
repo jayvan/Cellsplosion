@@ -50,3 +50,5 @@ Spawning:
 =========
 - Spawn off screen always
 * Try viewport follow
+
+** Trim the sprite to reduce collision box size
