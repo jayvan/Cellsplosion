@@ -12,7 +12,8 @@ window.onload = function() {
       WALL_SIZE                 = 100,
       PLAYER_WIDTH              = 50,
       PLAYER_HEIGHT             = 50,
-      INITIAL_ENEMY_COUNT       = 5;
+      INITIAL_ENEMY_COUNT       = 5,
+      FLOOR_IMAGE               = 'img/floor.jpg';
 
   Crafty.init(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
   Crafty.background("grey");
@@ -128,7 +129,7 @@ window.onload = function() {
       // Create the floor
       Crafty.e("2D, DOM, Image")
        .attr({w: WORLD_WIDTH, h: WORLD_HEIGHT, z: -1})
-       .image("img/floor.jpg", "repeat");
+       .image(FLOOR_IMAGE, "repeat");
     },
 
     debug: function() {
