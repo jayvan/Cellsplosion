@@ -38,6 +38,7 @@ window.onload = function() {
           if (validEnemyIndices.length >= 1) {
             this.typedNumber += number;
             for (var i = invalidEnemyIndices.length - 1; i >= 0; i--) {
+              this.enemies[invalidEnemyIndices[i]].resetCurDigitIndex();
               this.targetEnemyIndices.splice(this.targetEnemyIndices.indexOf(invalidEnemyIndices[i]), 1);
             }
           }
@@ -118,6 +119,7 @@ window.onload = function() {
     tryDigit: function(digit) {
       if (this.number[this.curDigitIndex] == digit) {
         this.curDigitIndex += 1;
+        this.numberRef.replace("<span class='typed'>" + this.number.slice(0,this.curDigitIndex) + "</span>" + this.number.slice(this.curDigitIndex));
         return true;
       }
       return false;
@@ -131,6 +133,7 @@ window.onload = function() {
     },
     
     resetCurDigitIndex: function() {
+      this.numberRef.replace(this.number);
       this.curDigitIndex = 0;
     },
     
@@ -142,7 +145,7 @@ window.onload = function() {
   
   Crafty.c("Number", {
     init: function() {
-      this.addComponent("2D, Color, DOM, Text");
+      this.addComponent("2D, Color, DOM, Text, HTML");
     }
   });
   
