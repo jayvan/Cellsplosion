@@ -29,6 +29,7 @@ Additional Ideas:
 - Animals (lions, tigers, bears, oh my!)
 - Obstacles (cars, dumpsters, office tables)
 - Mounts! (level, evolve, ride! training ui!)
+- Autopause when numlock is off
 
 Movement:
 =========

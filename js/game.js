@@ -144,7 +144,8 @@ window.onload = function() {
     },
 
     appendToTypedNumber: function(digit) {
-      this.typedNumber += digit;
+      this.typedNumber += digit.toString();
+      console.log(this.typedNumber);
       $('#currentNumber .num').text(this.typedNumber);
     },
 
@@ -170,11 +171,37 @@ window.onload = function() {
     init: function() {
       this.addComponent("2D, Color, DOM, Multiway, Collision, SpriteAnimation, PlayerSprite")
         .attr({x: WORLD_WIDTH / 2, y: WORLD_HEIGHT / 2, w: PLAYER_WIDTH, h: PLAYER_HEIGHT, z: 5})
+        .origin(PLAYER_WIDTH / 2, PLAYER_HEIGHT / 2)
         .color("white")
         .multiway(PLAYER_SPEED, {W: -90, S: 90, D: 0, A: 180})
         .animate('PlayerWalk', 0, 0, 3)
-        .animate('PlayerWalk', 30, -1)
-        .collision().onHit("Enemy", this.die);
+        .collision().onHit("Enemy", this.die)
+        .bind("NewDirection", function(direction) {
+          console.log("New Direction:", direction.x, direction.y);
+          if (direction.x == 0 && direction.y == 0) {
+            this.stop();
+          } else if (!this.isPlaying('PlayerWalk')) {
+            this.animate('PlayerWalk', 30, -1);
+          }
+
+          if (direction.x > 0 && direction.y > 0) {
+            this.rotation = 135;
+          } else if (direction.x == 0 && direction.y > 0) {
+            this.rotation = 180;
+          } else if (direction.x < 0 && direction.y > 0) {
+            this.rotation = 225;
+          } else if (direction.x < 0 && direction.y == 0) {
+            this.rotation = 270;
+          } else if (direction.x < 0 && direction.y < 0) {
+            this.rotation = 315;
+          } else if (direction.x == 0 && direction.y < 0) {
+            this.rotation = 0;
+          } else if (direction.x > 0 && direction.y < 0) {
+            this.rotation = 45;
+          } else if (direction.x > 0 && direction.y == 0) {
+            this.rotation = 90;
+          }
+        });
     },
 
     die: function() {
