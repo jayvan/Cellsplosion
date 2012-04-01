@@ -96,6 +96,22 @@ window.onload = function() {
         if (e.key >= Crafty.keys['0'] && e.key <= Crafty.keys['9']) {
           number = e.key - Crafty.keys['0'];
         }
+        
+        if (e.key == Crafty.keys['U']) {
+          number = 4;
+        } else if (e.key == Crafty.keys['I']) {
+          number = 5;
+        } else if (e.key == Crafty.keys['O']) {
+          number = 6;
+        } else if (e.key == Crafty.keys['J']) {
+          number = 1;
+        } else if (e.key == Crafty.keys['K']) {
+          number = 2;
+        } else if (e.key == Crafty.keys['L']) {
+          number = 3;
+        } else if (e.key == Crafty.keys['M'] || e.key == Crafty.keys['COMMA']) {
+          number = 0;
+        }
 
         if (number != -1) {
           var validEnemyIndices = [];
@@ -123,7 +139,7 @@ window.onload = function() {
             }
           }
         }
-        else if (e.key == Crafty.keys['ENTER'] || e.key == Crafty.keys['SPACE']) {
+        else if (e.key == Crafty.keys['ENTER'] || e.key == Crafty.keys['SPACE'] || e.key == Crafty.keys['P'] || e.key == 186 || e.key == Crafty.keys['PERIOD'] || e.key == 191) {
           this.resetTypedNumber();
           var killedEnemy = false;
           for (var i = this.targetEnemyIndices.length - 1; i >= 0; i--) {
