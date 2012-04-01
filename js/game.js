@@ -629,7 +629,7 @@ window.onload = function() {
     Crafty.audio.add("gameMusic", "audio/gameMusic.mp3");
     Crafty.audio.add("gameOver", "audio/gameOver.mp3");
     Crafty.audio.add("bossAlert", "audio/siren.mp3");
-    Crafty.audio.add("playerDeath", "audio/scream.wav");
+    Crafty.audio.add("playerDeath", "audio/scream.mp3");
 
     // Load sprites
     Crafty.sprite(100, 70, "img/hero.png", {PlayerSprite: [0, 0]});
