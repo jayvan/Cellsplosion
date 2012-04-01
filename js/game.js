@@ -20,6 +20,7 @@ window.onload = function() {
       WALL_VERTICAL_IMAGE       = 'img/wall_vertical.gif',
       PARKING_IMAGE             = 'img/parking_lines.png',
       INTRO_IMAGE               = 'img/intro_screen.png',
+      GAME_OVER_IMAGE           = 'img/game_over.png',
       NUM_DIAL_BEEPS            = 7,
       NUM_ZOMBIE_SOUNDS         = 7,
       NUM_ERROR_SOUNDS          = 4,
@@ -35,7 +36,15 @@ window.onload = function() {
   var ASSETS = [ FLOOR_IMAGE, WALL_VERTICAL_IMAGE, WALL_HORIZONTAL_IMAGE, PARKING_IMAGE, "img/hero.png", "img/cars.png", "img/enemy1.png", "audio/gameMusic.mp3", "audio/gameOver.mp3"
               , "audio/DIALBEEP1.mp3", "audio/DIALBEEP2.mp3", "audio/DIALBEEP3.mp3", "audio/DIALBEEP4.mp3", "audio/DIALBEEP5.mp3", "audio/DIALBEEP6.mp3", "audio/DIALBEEP7.mp3"
               , "audio/ZOMBIE1.mp3", "audio/ZOMBIE2.mp3", "audio/ZOMBIE3.mp3", "audio/ZOMBIE4.mp3", "audio/ZOMBIE5.mp3", "audio/ZOMBIE6.mp3", "audio/ZOMBIE7.mp3"
-              , "audio/ERROR1.mp3", "audio/ERROR2.mp3", "audio/ERROR3.mp3", "audio/ERROR4.mp3", "img/explosion1.png"];
+              , "audio/ERROR1.mp3", "audio/ERROR2.mp3", "audio/ERROR3.mp3", "audio/ERROR4.mp3", "img/explosion1.png", INTRO_IMAGE, GAME_OVER_IMAGE];
+
+  var GAME_OVER_QUOTES = [ "Looks like this game<br />played you.",
+                           "Looks like this number is<br />out of service.",
+                           "This lifeline has been<br />disconnected.",
+                           "Looks like somebody<br />forgot to call 911.",
+                           "Looks like you've been put<br />on hold.",
+                           "That's one number you can't<br />call collect." ]
+
   Crafty.audio.MAX_CHANNELS = 1;
   Crafty.init(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
   Crafty.background("grey");
@@ -55,6 +64,7 @@ window.onload = function() {
   };
   
   var score;
+  var enemiesKilled = 0;
   // Load high score
   var highScore = localStorage.getItem("highScore");
 
@@ -72,7 +82,7 @@ window.onload = function() {
       this.enemies = [];
       this.targetEnemyIndices = [];
       this.typedNumber = "";
-      this.enemiesKilled = 0;
+      enemiesKilled = 0;
 
       Crafty.audio.settings("gameMusic", {volume: 1.0});
 
@@ -110,7 +120,6 @@ window.onload = function() {
           for (var i = this.targetEnemyIndices.length - 1; i >= 0; i--) {
             if (this.enemies[this.targetEnemyIndices[i]].checkIfNumberComplete()) {
               killedEnemy = true;
-              // TODO: Change hardcoded enemy kill score
               try {
                 Crafty.audio.play("zombie" + Crafty.math.randomInt(1,NUM_ZOMBIE_SOUNDS).toString(), 0);
               }
@@ -119,14 +128,14 @@ window.onload = function() {
               this.addToScore(enemyToDestroy.getScore());
               enemyToDestroy.destroyEnemy();
               this.enemies.splice(this.targetEnemyIndices[i], 1);
-              this.enemiesKilled += 1;
+              enemiesKilled += 1;
 
-              if (this.enemiesKilled % ENEMY_BOSS_FREQUENCY == 0) {
+              if (enemiesKilled % ENEMY_BOSS_FREQUENCY == 0) {
                 $('#warning').animate({opacity: 0.3}, 200).animate({opacity: 0}, 400).animate({opacity: 0.3}, 200).animate({opacity: 0}, 400);
                 this.spawnBoss();
               } 
 
-              if (this.enemiesKilled % ENEMY_RESPAWN_FACTOR == 0) {
+              if (enemiesKilled % ENEMY_RESPAWN_FACTOR == 0) {
                 this.spawnEnemy(false);
               }
               this.spawnEnemy(false);
@@ -484,14 +493,6 @@ window.onload = function() {
     }
   });
 
-  // Crafty.c("Car", {
-  //   CAR_SPRITES = ["RedCarSprite", "BlueCarSprite", "GreenCarSprite"];
-
-  //   init: function() {
-  //     this.addComponent("2D, DOM")
-  //   }
-  // });
-
   Crafty.scene("main", function() {
     $("#score-box").show();
     Crafty.e("World");
@@ -499,6 +500,7 @@ window.onload = function() {
 
   Crafty.scene("gameOver", function() {
     Crafty(Crafty("World")[0]).destroy();
+    $('#score-box').hide();
 
     Crafty.audio.settings("gameMusic", {volume: 0});
     try {
@@ -508,23 +510,10 @@ window.onload = function() {
 
     Crafty.viewport.x = 0;
     Crafty.viewport.y = 0;
-    var gameOverText = "";
 
-    if (score == 0 && highScore == 0) {
-      gameOverText = "Wow, I'm so impressed. You couldn't even beat your massive high score of ZERO. Loser."
-    } else if (score == highScore) {
-      gameOverText = "Hey, you beat your high score. Now why don't you do something meaningful."
-    } else if (score < highScore) {
-      gameOverText = "Gosh, you did pretty well for a person who sucks at games."
-    }
-
-    Crafty.e("2D, Color, DOM, Text, Mouse")
-      .attr({w: 300, h: 100, x: HALF_VIEWPORT_HEIGHT, y: HALF_VIEWPORT_HEIGHT})
-      .color("red")
-      .text("Score: " + score + ". High score: " + highScore + ". " + gameOverText + " Press ENTER to Continue.")
-      .bind("MouseDown", function(e) {
-        Crafty.scene("main");
-      })
+    Crafty.e("2D, DOM, Image")
+      .attr({w: 800, h: 600, x: 0, y: 0})
+      .image(GAME_OVER_IMAGE)
       .bind("KeyDown", function(e) {
         if (e.key == Crafty.keys['ENTER']) {
           Crafty.audio.settings("gameOver", {volume: 0});
@@ -533,6 +522,36 @@ window.onload = function() {
           Crafty.audio.settings("gameMusic", {muted: false});
         }
       });
+    
+
+    // Quote
+    Crafty.e("2D, DOM, Text")
+      .attr({w: 300, h: 100, x: 403, y: 143, z: 5})
+      .text(Crafty.math.randomElementOfArray(GAME_OVER_QUOTES))
+      .textColor("#000000")
+      .css({'font-size': '24px', 'text-align': 'center'});
+
+    // Hiscore
+    Crafty.e("2D, DOM, Text")
+      .attr({w: 300, h: 100, x: 446, y: 225, z: 5})
+      .text("<span class='highscore'>High Score:</span> " + highScore)
+      .textColor("#000000")
+      .css({'font-size': '24px', 'text-align': 'left'});
+
+    // Score
+    Crafty.e("2D, DOM, Text")
+      .attr({w: 300, h: 100, x: 446, y: 255, z: 5})
+      .text("<span class='score'>Score:</span> " + score)
+      .textColor("#000000")
+      .css({'font-size': '24px', 'text-align': 'left'});
+
+    // Kills
+    Crafty.e("2D, DOM, Text")
+      .attr({w: 300, h: 100, x: 446, y: 285, z: 5})
+      .text("<span class='kills'>Phones Xploded:</span> " + enemiesKilled)
+      .textColor("#000000")
+      .css({'font-size': '24px', 'text-align': 'left'});
+
   });
 
   Crafty.scene("landing", function() {

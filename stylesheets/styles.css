@@ -22,6 +22,22 @@ body {
   color: #E4492B;
 }
 
+.Text {
+  font-family: Arial;
+}
+
+.highscore {
+  color: #D81B1B;
+}
+
+.score {
+  color: #1B62D8;
+}
+
+.kills {
+  color: #779D11;
+}
+
 #border-image {
   width: 800px;
   height: 600px;
