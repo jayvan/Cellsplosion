@@ -594,40 +594,26 @@ window.onload = function() {
   });
 
   Crafty.scene("loading", function() {
-    var progress = Crafty.e("2D, DOM, Text");
+    for (var i = 1; i <= 7; i++) {
+      Crafty.audio.add("dialBeep" + i.toString(), "audio/DIALBEEP" + i.toString() + '.mp3');
+    }
+    for (var i = 1; i <= NUM_ZOMBIE_SOUNDS; i++) {
+      Crafty.audio.add("zombie" + i.toString(), "audio/ZOMBIE" + i.toString() + '.mp3');
+    }
+    for (var i = 1; i <= NUM_ERROR_SOUNDS; i++) {
+      Crafty.audio.add("error" + i.toString(), "audio/ERROR" + i.toString() + '.mp3');
+    }
+    Crafty.audio.add("gameMusic", "audio/gameMusic.mp3");
+    Crafty.audio.add("gameOver", "audio/gameOver.mp3");
 
-    Crafty.load( ASSETS,
-      function() {
-        // Load Audio
-        for (var i = 1; i <= 7; i++) {
-          Crafty.audio.add("dialBeep" + i.toString(), "audio/DIALBEEP" + i.toString() + '.mp3');
-        }
-        for (var i = 1; i <= NUM_ZOMBIE_SOUNDS; i++) {
-          Crafty.audio.add("zombie" + i.toString(), "audio/ZOMBIE" + i.toString() + '.mp3');
-        }
-        for (var i = 1; i <= NUM_ERROR_SOUNDS; i++) {
-          Crafty.audio.add("error" + i.toString(), "audio/ERROR" + i.toString() + '.mp3');
-        }
-        Crafty.audio.add("gameMusic", "audio/gameMusic.mp3");
-        Crafty.audio.add("gameOver", "audio/gameOver.mp3");
+    // Load sprites
+    Crafty.sprite(100, 70, "img/hero.png", {PlayerSprite: [0, 0]});
+    Crafty.sprite(100, 77, "img/enemy1.png", {EnemySprite: [0, 0]});
+    Crafty.sprite(80, 139, "img/cars.png", {RedCarSprite: [0, 0], BlueCarSprite: [1, 0], GreenCarSprite: [2, 0]}, 10, 0);
+    Crafty.sprite(100, 100, "img/explosion1.png", {Explosion1: [0, 0]});
 
-        // Load sprites
-        Crafty.sprite(100, 70, "img/hero.png", {PlayerSprite: [0, 0]});
-        Crafty.sprite(100, 77, "img/enemy1.png", {EnemySprite: [0, 0]});
-        Crafty.sprite(80, 139, "img/cars.png", {RedCarSprite: [0, 0], BlueCarSprite: [1, 0], GreenCarSprite: [2, 0]}, 10, 0);
-        Crafty.sprite(100, 100, "img/explosion1.png", {Explosion1: [0, 0]});
+    Crafty.scene("landing");
 
-        Crafty.scene("landing");
-      },
-
-      function(e) {
-        progress.text(e.loaded + " / " + e.total);
-      },
-
-      function(e) {
-        console.log("Error Loading");
-      }
-    );
   });
   
   Crafty.scene("loading");
