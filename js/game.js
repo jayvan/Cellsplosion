@@ -30,7 +30,7 @@ window.onload = function() {
       ENEMY_RESPAWN_FACTOR      = 2,
       EXPLOSION_DURATION        = 400,
       PLAYER_HITCIRCLE_RADIUS   = 50,
-      ENEMY_BOSS_FREQUENCY      = 1,
+      ENEMY_BOSS_FREQUENCY      = 25,
       ENEMY_BOSS_SPEED          = 4,
       ENEMY_BOSS_DIFFICULTY     = 7;
 
