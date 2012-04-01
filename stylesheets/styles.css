@@ -64,6 +64,7 @@ body {
   font-family: "Lcdphone", monospace;
   color: #6DF6F0;
   z-index: 501;
+  display: none;
 }
 
 #score-box .number{

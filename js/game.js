@@ -18,6 +18,7 @@ window.onload = function() {
       WALL_HORIZONTAL_IMAGE     = 'img/wall_horizontal.gif',
       WALL_VERTICAL_IMAGE       = 'img/wall_vertical.gif',
       PARKING_IMAGE             = 'img/parking_lines.png',
+      INTRO_IMAGE               = 'img/intro_screen.png',
       NUM_DIAL_BEEPS            = 7,
       NUM_ZOMBIE_SOUNDS         = 7,
       NUM_ERROR_SOUNDS          = 4,
@@ -486,6 +487,7 @@ window.onload = function() {
   // });
 
   Crafty.scene("main", function() {
+    $("#score-box").show();
     Crafty.e("World");
   });
 
@@ -531,13 +533,9 @@ window.onload = function() {
     Crafty.audio.play("gameMusic", -1).settings('gameMusic', {loop: true});
     fadeIn("gameMusic", 0, 0.7);
 
-    Crafty.e("2D, Color, DOM, Text, Mouse")
-      .attr({w: 300, h: 100, x: HALF_VIEWPORT_HEIGHT, y: HALF_VIEWPORT_HEIGHT})
-      .color("green")
-      .text("Welcome to Cellsplosion!  Left hand on WASD.  Right hand on NumPad.  Press ENTER to Start.")
-      .bind("MouseDown", function(e) {
-        Crafty.scene("main");
-      })
+    Crafty.e("2D, DOM, Image")
+      .attr({w: 800, h: 600, x: 0, y: 0})
+      .image(INTRO_IMAGE)
       .bind("KeyDown", function(e) {
         if (e.key == Crafty.keys['ENTER']) {
           Crafty.scene("main");
