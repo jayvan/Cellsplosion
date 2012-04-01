@@ -348,8 +348,21 @@ window.onload = function() {
     },
     
     destroyEnemy: function() {
+      Crafty.e("Explosion")
+        .attr({x: this.x, y: this.y});
+
       this.numberRef.destroy();
       this.destroy();
+    }
+  });
+
+  Crafty.c("Explosion", {
+    init: function() {
+      this.addComponent("2D, DOM, Color")
+        .color("red")
+        .attr({w: 100, h: 100});
+      var explosion = this;
+      window.setTimeout( function() { explosion.destroy();}, 1000);
     }
   });
   
