@@ -18,6 +18,7 @@ window.onload = function() {
       FLOOR_IMAGE               = 'img/ground.gif',
       WALL_HORIZONTAL_IMAGE     = 'img/wall_horizontal.gif',
       WALL_VERTICAL_IMAGE       = 'img/wall_vertical.gif',
+      WALL_CORNER_IMAGE         = 'img/wall_corner.png',
       PARKING_IMAGE             = 'img/parking_lines.png',
       INTRO_IMAGE               = 'img/intro_screen.png',
       GAME_OVER_IMAGE           = 'img/game_over.png',
@@ -301,6 +302,28 @@ window.onload = function() {
       Crafty.e("2D, DOM, Image")
         .attr({w: WORLD_WIDTH, h: WALL_SIZE, x: 0, y: 0, z: -3})
         .image(WALL_HORIZONTAL_IMAGE, "repeat");
+
+      // Top left corner
+      Crafty.e("2D, DOM, Image")
+        .attr({w: WALL_SIZE, h: WALL_SIZE, x: 0, y: 0, z: -2})
+        .image(WALL_CORNER_IMAGE, "repeat");
+
+      // Top Right corner
+      Crafty.e("2D, DOM, Image")
+        .attr({w: WALL_SIZE, h: WALL_SIZE, x: WORLD_WIDTH - WALL_SIZE, y: 0, z: -2})
+        .image(WALL_CORNER_IMAGE, "repeat")
+        .flip("X");
+
+      // Bottom Left
+      Crafty.e("2D, DOM, Image")
+        .attr({w: WALL_SIZE, h: WALL_SIZE, x: 0, y: WORLD_HEIGHT - WALL_SIZE, z: -2})
+        .image(WALL_CORNER_IMAGE, "repeat")
+        .flip("Y");
+
+      // Bottom Right
+      Crafty.e("2D, DOM, Image")
+        .attr({w: WALL_SIZE, h: WALL_SIZE, x: WORLD_WIDTH - WALL_SIZE, y: WORLD_HEIGHT - WALL_SIZE, z: -2})
+        .image("img/wall_corner_bottom_right.png", "repeat");
     },
 
     resetTypedNumber: function() {
