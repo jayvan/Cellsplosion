@@ -13,7 +13,7 @@ window.onload = function() {
       WALL_SIZE                 = 50,
       PLAYER_WIDTH              = 100,
       PLAYER_HEIGHT             = 70,
-      INITIAL_ENEMY_COUNT       = 5,
+      INITIAL_ENEMY_COUNT       = 10,
       FLOOR_IMAGE               = 'img/ground.gif',
       WALL_HORIZONTAL_IMAGE     = 'img/wall_horizontal.gif',
       WALL_VERTICAL_IMAGE       = 'img/wall_vertical.gif',
@@ -23,8 +23,9 @@ window.onload = function() {
       NUM_ERROR_SOUNDS          = 4,
       ENEMY_SPEEDS              = {4: 0.01, 3: 0.05, 2: 0.14, 1: 0.8}
       ENEMY_DIFFICULTIES        = {7: 0.01, 6: 0.05, 5: 0.10, 4: 0.14, 3: 0.7}
-      ENEMY_RESPAWN_FACTOR      = 5,
-      EXPLOSION_DURATION        = 400;
+      ENEMY_RESPAWN_FACTOR      = 2,
+      EXPLOSION_DURATION        = 400,
+      PLAYER_HITCIRCLE_RADIUS   = 50;
 
   var ASSETS = [ FLOOR_IMAGE, WALL_VERTICAL_IMAGE, WALL_HORIZONTAL_IMAGE, PARKING_IMAGE, "img/hero.png", "img/cars.png", "img/enemy1.png", "audio/gameMusic.mp3", "audio/gameOver.mp3"
               , "audio/DIALBEEP1.mp3", "audio/DIALBEEP2.mp3", "audio/DIALBEEP3.mp3", "audio/DIALBEEP4.mp3", "audio/DIALBEEP5.mp3", "audio/DIALBEEP6.mp3", "audio/DIALBEEP7.mp3"
@@ -275,7 +276,11 @@ window.onload = function() {
         .multiway(PLAYER_SPEED, {W: -90, S: 90, D: 0, A: 180})
         .animate('PlayerWalk', 0, 0, 3)
         .collision().onHit("Enemy", function(e) { 
-          if (!e[0].obj.dead) {
+          if (e[0].obj.dead) {
+            return;
+          }
+          var circle = new Crafty.circle(this.x + PLAYER_WIDTH / 2, this.y + PLAYER_HEIGHT / 2, PLAYER_HITCIRCLE_RADIUS);
+          if (circle.containsPoint(e[0].obj.x + ENEMY_WIDTH / 2, e[0].obj.y + ENEMY_HEIGHT / 2)) {
             this.die();
           }
         })
