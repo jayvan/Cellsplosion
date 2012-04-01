@@ -30,7 +30,7 @@ window.onload = function() {
       ENEMY_RESPAWN_FACTOR      = 2,
       EXPLOSION_DURATION        = 400,
       PLAYER_HITCIRCLE_RADIUS   = 50,
-      ENEMY_BOSS_FREQUENCY      = 25,
+      ENEMY_BOSS_FREQUENCY      = 1,
       ENEMY_BOSS_SPEED          = 4,
       ENEMY_BOSS_DIFFICULTY     = 7;
 
@@ -634,8 +634,8 @@ window.onload = function() {
     }
     Crafty.audio.add("gameMusic", "audio/gameMusic.mp3");
     Crafty.audio.add("gameOver", "audio/gameOver.mp3");
-    Crafty.audio.add("bossAlert", "audio/siren.wav");
-    Crafty.audio.add("playerDeath", "audio/scream.wav");
+    Crafty.audio.add("bossAlert", "audio/siren.mp3");
+    Crafty.audio.add("playerDeath", "audio/scream.mp3");
 
     // Load sprites
     Crafty.sprite(100, 70, "img/hero.png", {PlayerSprite: [0, 0]});
