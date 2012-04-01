@@ -372,14 +372,14 @@ window.onload = function() {
     Crafty.sprite(100, 77, "img/enemy1.png", {EnemySprite: [0, 0]});
     Crafty.sprite(80, 139, "img/cars.png", {RedCarSprite: [0, 0], BlueCarSprite: [1, 0], GreenCarSprite: [2, 0]}, 10, 0);
 
-    //Load dial beeps
-    // for (var i = 1; i <= 7; i++) {
-    //   Crafty.audio.add("dialBeep" + i.toString(), "audio/DIALBEEP" + i.toString() + '.mp3');
-    // }
+    // Load dial beeps
+    for (var i = 1; i <= 7; i++) {
+      Crafty.audio.add("dialBeep" + i.toString(), "audio/DIALBEEP" + i.toString() + '.mp3');
+    }
 
     Crafty.audio.add("gameMusic", "audio/gameMusic.mp3");
     Crafty.audio.play("gameMusic", -1);
-    Crafty.audio.settings("gameMusic", {volume: 0});
+    // Crafty.audio.settings("gameMusic", {volume: 0});
 
     var fadeIn = function(name, vol) {
       if (typeof(vol) === "undefined") {
