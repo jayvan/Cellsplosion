@@ -4,8 +4,9 @@ window.onload = function() {
       HALF_VIEWPORT_WIDTH       = VIEWPORT_WIDTH / 2,
       HALF_VIEWPORT_HEIGHT      = VIEWPORT_HEIGHT / 2,
       PLAYER_SPEED              = 5,
-      ENEMY_SPEED               = 1,
       ENEMY_WIDTH               = 100,
+      EASY_ENEMY_MAX_SPEED      = 2,
+      EASY_ENEMY_MAX_DIFFICULTY = 4,
       ENEMY_HEIGHT              = 77,
       NUMBER_FONT_SIZE          = 20,
       WORLD_WIDTH               = VIEWPORT_WIDTH * 3,
@@ -126,9 +127,9 @@ window.onload = function() {
               } 
 
               if (this.enemiesKilled % ENEMY_RESPAWN_FACTOR == 0) {
-                this.spawnEnemy();
+                this.spawnEnemy(false);
               }
-              this.spawnEnemy();
+              this.spawnEnemy(false);
             }
             else {
               this.enemies[this.targetEnemyIndices[i]].resetCurDigitIndex();
@@ -173,7 +174,7 @@ window.onload = function() {
       Crafty.viewport.follow(this.player, 0, 0);
     },
     
-    spawnEnemy: function() {
+    spawnEnemy: function(easyMode) {
       var x = 0,
           y = 0;
 
@@ -209,6 +210,11 @@ window.onload = function() {
         }
       }
 
+      if (easyMode) {
+        speed = Math.min(speed, EASY_ENEMY_MAX_SPEED);
+        difficulty = Math.min(difficulty, EASY_ENEMY_MAX_DIFFICULTY);
+      }
+
       this.enemies.push(Crafty.e("Enemy").difficulty(difficulty).setSpeed(speed).attr({x: x, y: y}));
     },
 
@@ -231,7 +237,7 @@ window.onload = function() {
       this.setViewport();
 
       for (var i = 0; i < INITIAL_ENEMY_COUNT; i++) {
-        this.spawnEnemy();
+        this.spawnEnemy(true);
         this.targetEnemyIndices.push(i);
       }
 
