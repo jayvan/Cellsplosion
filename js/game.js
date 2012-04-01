@@ -33,11 +33,6 @@ window.onload = function() {
       ENEMY_BOSS_SPEED          = 4,
       ENEMY_BOSS_DIFFICULTY     = 7;
 
-  var ASSETS = [ FLOOR_IMAGE, WALL_VERTICAL_IMAGE, WALL_HORIZONTAL_IMAGE, PARKING_IMAGE, "img/hero.png", "img/cars.png", "img/enemy1.png", "audio/gameMusic.mp3", "audio/gameOver.mp3"
-              , "audio/DIALBEEP1.mp3", "audio/DIALBEEP2.mp3", "audio/DIALBEEP3.mp3", "audio/DIALBEEP4.mp3", "audio/DIALBEEP5.mp3", "audio/DIALBEEP6.mp3", "audio/DIALBEEP7.mp3"
-              , "audio/ZOMBIE1.mp3", "audio/ZOMBIE2.mp3", "audio/ZOMBIE3.mp3", "audio/ZOMBIE4.mp3", "audio/ZOMBIE5.mp3", "audio/ZOMBIE6.mp3", "audio/ZOMBIE7.mp3", 'audio/siren.mp3'
-              , 'audio/death.mp3', "audio/ERROR1.mp3", "audio/ERROR2.mp3", "audio/ERROR3.mp3", "audio/ERROR4.mp3", "img/explosion1.png", INTRO_IMAGE, GAME_OVER_IMAGE];
-
   var GAME_OVER_QUOTES = [ "Looks like this game<br />played you.",
                            "Looks like this number is<br />out of service.",
                            "This lifeline has been<br />disconnected.",
@@ -68,7 +63,7 @@ window.onload = function() {
   // Load high score
   var highScore = localStorage.getItem("highScore");
 
-  if (highScore == null) {
+  if (highScore === null) {
     highScore = 0;
   }
 
@@ -139,12 +134,12 @@ window.onload = function() {
               this.enemies.splice(this.targetEnemyIndices[i], 1);
               enemiesKilled += 1;
 
-              if (enemiesKilled % ENEMY_BOSS_FREQUENCY == 0) {
+              if (enemiesKilled % ENEMY_BOSS_FREQUENCY === 0) {
                 $('#warning').animate({opacity: 0.3}, 200).animate({opacity: 0}, 400).animate({opacity: 0.3}, 200).animate({opacity: 0}, 400);
                 this.spawnBoss();
               } 
 
-              if (enemiesKilled % ENEMY_RESPAWN_FACTOR == 0) {
+              if (enemiesKilled % ENEMY_RESPAWN_FACTOR === 0) {
                 this.spawnEnemy(false);
               }
               this.spawnEnemy(false);
@@ -272,17 +267,17 @@ window.onload = function() {
       // Left
       Crafty.e("2D, DOM, Image")
         .attr({w: WALL_SIZE, h: WORLD_HEIGHT, x: 0, y: 0, z: -3})
-        .image(WALL_VERTICAL_IMAGE, "repeat")
+        .image(WALL_VERTICAL_IMAGE, "repeat");
       // Right
       Crafty.e("2D, DOM, Image")
         .attr({w: WALL_SIZE, h: WORLD_HEIGHT, x: WORLD_WIDTH - WALL_SIZE, y: 0, z: -3})
         .image(WALL_VERTICAL_IMAGE, "repeat")
-        .flip("X")
+        .flip("X");
       // Bottom
       Crafty.e("2D, DOM, Image")
         .attr({w: WORLD_WIDTH, h: WALL_SIZE, x: 0, y: WORLD_HEIGHT - WALL_SIZE, z: -3})
         .image(WALL_HORIZONTAL_IMAGE, "repeat")
-        .flip("Y")
+        .flip("Y");
       // Top
       Crafty.e("2D, DOM, Image")
         .attr({w: WORLD_WIDTH, h: WALL_SIZE, x: 0, y: 0, z: -3})
@@ -340,7 +335,7 @@ window.onload = function() {
           }
         })
         .bind("NewDirection", function(direction) {
-          if (direction.x == 0 && direction.y == 0) {
+          if (direction.x === 0 && direction.y === 0) {
             this.stop();
           } else if (!this.isPlaying('PlayerWalk')) {
             this.animate('PlayerWalk', 30, -1);
@@ -348,19 +343,19 @@ window.onload = function() {
 
           if (direction.x > 0 && direction.y > 0) {
             this.rotation = 135;
-          } else if (direction.x == 0 && direction.y > 0) {
+          } else if (direction.x === 0 && direction.y > 0) {
             this.rotation = 180;
           } else if (direction.x < 0 && direction.y > 0) {
             this.rotation = 225;
-          } else if (direction.x < 0 && direction.y == 0) {
+          } else if (direction.x < 0 && direction.y === 0) {
             this.rotation = 270;
           } else if (direction.x < 0 && direction.y < 0) {
             this.rotation = 315;
-          } else if (direction.x == 0 && direction.y < 0) {
+          } else if (direction.x === 0 && direction.y < 0) {
             this.rotation = 0;
           } else if (direction.x > 0 && direction.y < 0) {
             this.rotation = 45;
-          } else if (direction.x > 0 && direction.y == 0) {
+          } else if (direction.x > 0 && direction.y === 0) {
             this.rotation = 90;
           }
         });
@@ -419,7 +414,7 @@ window.onload = function() {
       direction = {
         x: player.x - this.x,
         y: player.y - this.y
-      }
+      };
       this.rotation = Math.atan2(direction.y, direction.x) * 180 / Math.PI + 90;
     },
     
