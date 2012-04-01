@@ -154,7 +154,7 @@ window.onload = function() {
                 try {
                   Crafty.audio.play("bossAlert", 0);
                 } catch (e) { }
-                $('#warning').animate({opacity: 0.3}, 200).animate({opacity: 0}, 400).animate({opacity: 0.3}, 200).animate({opacity: 0}, 400);
+                $('#warning').animate({opacity: 0.3}, 490).animate({opacity: 0}, 400).animate({opacity: 0.3}, 200).animate({opacity: 0}, 400);
                 this.spawnBoss();
               } 
 
@@ -605,7 +605,7 @@ window.onload = function() {
     }
     Crafty.audio.add("gameMusic", "audio/gameMusic.mp3");
     Crafty.audio.add("gameOver", "audio/gameOver.mp3");
-    Crafty.audio.add("bossAlert", "audio/siren.wav");
+    Crafty.audio.add("bossAlert", "audio/siren.mp3");
     Crafty.audio.add("playerDeath", "audio/scream.wav");
 
     // Load sprites
