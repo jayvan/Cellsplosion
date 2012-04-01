@@ -17,7 +17,8 @@ window.onload = function() {
       FLOOR_IMAGE               = 'img/ground.gif',
       WALL_HORIZONTAL_IMAGE     = 'img/wall_horizontal.gif',
       WALL_VERTICAL_IMAGE       = 'img/wall_vertical.gif',
-      PARKING_IMAGE             = 'img/parking_lines.png';
+      PARKING_IMAGE             = 'img/parking_lines.png',
+      NUM_DIAL_BEEPS            = 7;
 
   Crafty.init(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
   Crafty.background("grey");
@@ -41,7 +42,7 @@ window.onload = function() {
       this.targetEnemyIndices = [];
       this.typedNumber = "";
 
-      Crafty.audio.settings("gameMusic", {muted: false});
+      Crafty.audio.settings("gameMusic", {volume: 1.0});
 
       this.bind("KeyDown", function(e) {
         if (e.key >= Crafty.keys['NUMPAD_0'] && e.key <= Crafty.keys['NUMPAD_9']) {
@@ -59,6 +60,7 @@ window.onload = function() {
           }
           // Go through and delete all of the targets that were not valid IF there is one or more valid targets
           if (validEnemyIndices.length >= 1) {
+            Crafty.audio.play("dialBeep" + Crafty.math.randomInt(1,NUM_DIAL_BEEPS).toString(), 0);
             this.appendToTypedNumber(number);
             for (var i = invalidEnemyIndices.length - 1; i >= 0; i--) {
               this.enemies[invalidEnemyIndices[i]].resetCurDigitIndex();
@@ -323,6 +325,14 @@ window.onload = function() {
     }
   });
 
+  // Crafty.c("Car", {
+  //   CAR_SPRITES = ["RedCarSprite", "BlueCarSprite", "GreenCarSprite"];
+
+  //   init: function() {
+  //     this.addComponent("2D, DOM")
+  //   }
+  // });
+
   Crafty.scene("main", function() {
     Crafty.e("World");
   });
@@ -360,9 +370,31 @@ window.onload = function() {
   Crafty.scene("loading", function() {
     Crafty.sprite(100, 70, "img/hero.png", {PlayerSprite: [0, 0]});
     Crafty.sprite(100, 77, "img/enemy1.png", {EnemySprite: [0, 0]});
+    Crafty.sprite(80, 139, "img/cars.png", {RedCarSprite: [0, 0], BlueCarSprite: [1, 0], GreenCarSprite: [2, 0]}, 10, 0);
+
+    //Load dial beeps
+    // for (var i = 1; i <= 7; i++) {
+    //   Crafty.audio.add("dialBeep" + i.toString(), "audio/DIALBEEP" + i.toString() + '.mp3');
+    // }
+
     Crafty.audio.add("gameMusic", "audio/gameMusic.mp3");
     Crafty.audio.play("gameMusic", -1);
-    Crafty.audio.settings("gameMusic", {muted: true});
+    Crafty.audio.settings("gameMusic", {volume: 0});
+
+    var fadeIn = function(name, vol) {
+      if (typeof(vol) === "undefined") {
+        vol = 0;
+      }
+      vol += 0.1;
+      console.log(vol);
+      Crafty.audio.settings(name, {volume: vol});
+      if (vol != 1) {
+        window.setTimeout(function() { fadeIn(name, vol) }, 300);
+      }
+    }
+    fadeIn("gameMusic");
+
+    
 
     Crafty.audio.add("gameOver", "audio/gameOver.mp3");
 
