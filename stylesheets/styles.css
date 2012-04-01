@@ -31,6 +31,16 @@ body {
   pointer-events: none;
 }
 
+#warning {
+  position:absolute;
+  width:800px;
+  height: 600px;
+  background: red;
+  opacity: 0;
+  z-index: 505;
+  pointer-events: none;
+}
+
 #cr-stage {
   float: left;
 }

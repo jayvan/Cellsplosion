@@ -120,8 +120,9 @@ window.onload = function() {
               this.enemiesKilled += 1;
 
               if (this.enemiesKilled % ENEMY_BOSS_FREQUENCY == 0) {
+                $('#warning').animate({opacity: 0.3}, 200).animate({opacity: 0}, 400).animate({opacity: 0.3}, 200).animate({opacity: 0}, 400);
                 this.spawnBoss();
-              }
+              } 
 
               if (this.enemiesKilled % ENEMY_RESPAWN_FACTOR == 0) {
                 this.spawnEnemy();
