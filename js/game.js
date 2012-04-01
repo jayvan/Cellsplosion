@@ -427,9 +427,11 @@ window.onload = function() {
     tryDigit: function(digit) {
       if (this.number[this.curDigitIndex] == digit) {
         this.curDigitIndex += 1;
+        this.numberRef.attr({z: 11});
         this.numberRef.text("<span class='typed'>" + this.number.slice(0,this.curDigitIndex) + "</span>" + this.number.slice(this.curDigitIndex));
         return true;
       }
+      this.numberRef.attr({z: 10});
       return false;
     },
     
