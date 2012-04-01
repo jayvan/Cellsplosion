@@ -151,6 +151,9 @@ window.onload = function() {
               enemiesKilled += 1;
 
               if (enemiesKilled % ENEMY_BOSS_FREQUENCY === 0) {
+                try {
+                  Crafty.audio.play("bossAlert", 0);
+                } catch (e) { }
                 $('#warning').animate({opacity: 0.3}, 200).animate({opacity: 0}, 400).animate({opacity: 0.3}, 200).animate({opacity: 0}, 400);
                 this.spawnBoss();
               } 
@@ -383,6 +386,9 @@ window.onload = function() {
       if (this.dead) {
         return;
       }
+      try {
+        Crafty.audio.play("playerDeath", 0);
+      } catch (e) { }
       this.dead = true;
       this.deathPosition = {x: this.x, y: this.y};
       highScore = Math.max(highScore, score);
@@ -542,7 +548,6 @@ window.onload = function() {
           Crafty.audio.settings("gameMusic", {muted: false});
         }
       });
-    
 
     // Quote
     Crafty.e("2D, DOM, Text")
@@ -600,6 +605,8 @@ window.onload = function() {
     }
     Crafty.audio.add("gameMusic", "audio/gameMusic.mp3");
     Crafty.audio.add("gameOver", "audio/gameOver.mp3");
+    Crafty.audio.add("bossAlert", "audio/siren.wav");
+    Crafty.audio.add("playerDeath", "audio/scream.wav");
 
     // Load sprites
     Crafty.sprite(100, 70, "img/hero.png", {PlayerSprite: [0, 0]});
