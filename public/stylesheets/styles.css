@@ -6,6 +6,17 @@ body {
   background: black;
 }
 
+#explanation {
+  width: 800px;
+  text-align: center;
+}
+
+p {
+  color: white;
+  margin: 0;
+  font-family: monospace;
+}
+
 .Number {
   color: #F8F8F2;
   text-align: center;
@@ -104,4 +115,10 @@ body {
   color: #E4492B;
   font-family: monospace;
   font-size: 27px;
+}
+
+#credits {
+  width: 398px;
+  text-align: center;
+  float:right;
 }
