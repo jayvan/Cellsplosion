@@ -56,3 +56,11 @@ Spawning:
 
 
 *** Pull request for music repeat
+
+Credits:
+========
+Justin Vanderheide -Dev
+Raymond Tang -Dev
+Andreux Glisinski -Artist
+Ryan Roth -Music
+Jen Costa -Sound FX

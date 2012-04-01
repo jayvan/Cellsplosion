@@ -330,7 +330,7 @@ window.onload = function() {
   Crafty.scene("gameOver", function() {
     Crafty.audio.settings("gameMusic", {muted: true});
     Crafty.audio.play("gameOver", 0);
-    
+
     Crafty.viewport.x = 0;
     Crafty.viewport.y = 0;
     var gameOverText = "";
@@ -346,9 +346,14 @@ window.onload = function() {
     Crafty.e("2D, Color, DOM, Text, Mouse")
       .attr({w: 300, h: 100, x: HALF_VIEWPORT_HEIGHT, y: HALF_VIEWPORT_HEIGHT})
       .color("red")
-      .text("Score: " + score + ". High score: " + highScore + ". " + gameOverText)
+      .text("Score: " + score + ". High score: " + highScore + ". " + gameOverText + " Press ENTER to Continue.")
       .bind("MouseDown", function(e) {
         Crafty.scene("main");
+      })
+      .bind("KeyDown", function(e) {
+        if (e.key == Crafty.keys['ENTER']) {
+          Crafty.scene("main");
+        }
       });
   });
 
@@ -364,9 +369,14 @@ window.onload = function() {
     Crafty.e("2D, Color, DOM, Text, Mouse")
       .attr({w: 300, h: 100, x: HALF_VIEWPORT_HEIGHT, y: HALF_VIEWPORT_HEIGHT})
       .color("green")
-      .text("Start")
+      .text("Welcome to Cellsplosion!  Left hand on WASD.  Right hand on NumPad.  Press ENTER to Start.")
       .bind("MouseDown", function(e) {
         Crafty.scene("main");
+      })
+      .bind("KeyDown", function(e) {
+        if (e.key == Crafty.keys['ENTER']) {
+          Crafty.scene("main");
+        }
       });
   });
   
