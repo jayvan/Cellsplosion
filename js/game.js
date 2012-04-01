@@ -18,12 +18,15 @@ window.onload = function() {
       WALL_HORIZONTAL_IMAGE     = 'img/wall_horizontal.gif',
       WALL_VERTICAL_IMAGE       = 'img/wall_vertical.gif',
       PARKING_IMAGE             = 'img/parking_lines.png',
-      NUM_DIAL_BEEPS            = 7,
-      NUM_ZOMBIE_SOUNDS         = 7;
+      NUM_DIAL_BEEPS            = 5,
+      NUM_ZOMBIE_SOUNDS         = 7,
+      NUM_ERROR_SOUNDS          = 2;
 
   var ASSETS = [ FLOOR_IMAGE, WALL_VERTICAL_IMAGE, WALL_HORIZONTAL_IMAGE, PARKING_IMAGE, "img/hero.png", "img/cars.png", "img/enemy1.png", "audio/gameMusic.mp3", "audio/gameOver.mp3"
-              , "audio/DIALBEEP1.mp3", "audio/DIALBEEP2.mp3", "audio/DIALBEEP3.mp3", "audio/DIALBEEP4.mp3", "audio/DIALBEEP5.mp3", "audio/DIALBEEP6.mp3", "audio/DIALBEEP7.mp3"];
-
+              , "audio/DIALBEEP1.mp3", "audio/DIALBEEP2.mp3", "audio/DIALBEEP3.mp3", "audio/DIALBEEP4.mp3", "audio/DIALBEEP5.mp3", "audio/DIALBEEP6.mp3", "audio/DIALBEEP7.mp3"
+              , "audio/ZOMBIE1.mp3", "audio/ZOMBIE2.mp3", "audio/ZOMBIE3.mp3", "audio/ZOMBIE4.mp3", "audio/ZOMBIE5.mp3", "audio/ZOMBIE6.mp3", "audio/ZOMBIE7.mp3"
+              , "audio/ERROR1.mp3", "audio/ERROR2.mp3", "audio/ERROR3.mp3", "audio/ERROR4.mp3"];
+  Crafty.audio.MAX_CHANNELS = 1;
   Crafty.init(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
   Crafty.background("grey");
 
@@ -36,7 +39,6 @@ window.onload = function() {
     }
     vol = Math.min(vol + 0.1, maxVol);
     Crafty.audio.settings(name, {volume: vol});
-    console.log(vol);
     if (vol != maxVol) {
       window.setTimeout(function() { fadeIn(name, vol, maxVol) }, 300);
     }
@@ -91,8 +93,10 @@ window.onload = function() {
         }
         else if (e.key == Crafty.keys['ENTER']) {
           this.resetTypedNumber();
+          var killedEnemy = false;
           for (var i = this.targetEnemyIndices.length - 1; i >= 0; i--) {
             if (this.enemies[this.targetEnemyIndices[i]].checkIfNumberComplete()) {
+              killedEnemy = true;
               // TODO: Change hardcoded enemy kill score
               Crafty.audio.play("zombie" + Crafty.math.randomInt(1,NUM_ZOMBIE_SOUNDS).toString(), 0);
               this.addToScore(10);
@@ -104,10 +108,12 @@ window.onload = function() {
               this.enemies[this.targetEnemyIndices[i]].resetCurDigitIndex();
             }
           }
-          
           this.targetEnemyIndices = [];
           for (var i = 0; i < this.enemies.length; i++) {
             this.targetEnemyIndices.push(i);
+          }
+          if (!killedEnemy) {
+            Crafty.audio.play("error" + Crafty.math.randomInt(1,NUM_ERROR_SOUNDS).toString(), 0);
           }
         }
       });
@@ -423,6 +429,9 @@ window.onload = function() {
         for (var i = 1; i <= NUM_ZOMBIE_SOUNDS; i++) {
           Crafty.audio.add("zombie" + i.toString(), "audio/ZOMBIE" + i.toString() + '.mp3');
         }
+        for (var i = 1; i <= NUM_ERROR_SOUNDS; i++) {
+          Crafty.audio.add("error" + i.toString(), "audio/ERROR" + i.toString() + '.mp3');
+        }
         Crafty.audio.add("gameMusic", "audio/gameMusic.mp3");
         Crafty.audio.add("gameOver", "audio/gameOver.mp3");
 
@@ -430,6 +439,8 @@ window.onload = function() {
         Crafty.sprite(100, 70, "img/hero.png", {PlayerSprite: [0, 0]});
         Crafty.sprite(100, 77, "img/enemy1.png", {EnemySprite: [0, 0]});
         Crafty.sprite(80, 139, "img/cars.png", {RedCarSprite: [0, 0], BlueCarSprite: [1, 0], GreenCarSprite: [2, 0]}, 10, 0);
+
+        Crafty.scene("landing");
       },
 
       function(e) {
