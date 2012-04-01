@@ -104,7 +104,7 @@ window.onload = function() {
             }
           }
         }
-        else if (e.key == Crafty.keys['ENTER']) {
+        else if (e.key == Crafty.keys['ENTER'] || e.key == Crafty.keys['SPACE']) {
           this.resetTypedNumber();
           var killedEnemy = false;
           for (var i = this.targetEnemyIndices.length - 1; i >= 0; i--) {
