@@ -25,7 +25,10 @@ window.onload = function() {
       ENEMY_DIFFICULTIES        = {7: 0.01, 6: 0.05, 5: 0.10, 4: 0.14, 3: 0.7}
       ENEMY_RESPAWN_FACTOR      = 2,
       EXPLOSION_DURATION        = 400,
-      PLAYER_HITCIRCLE_RADIUS   = 50;
+      PLAYER_HITCIRCLE_RADIUS   = 50,
+      ENEMY_BOSS_FREQUENCY      = 25,
+      ENEMY_BOSS_SPEED          = 4,
+      ENEMY_BOSS_DIFFICULTY     = 7;
 
   var ASSETS = [ FLOOR_IMAGE, WALL_VERTICAL_IMAGE, WALL_HORIZONTAL_IMAGE, PARKING_IMAGE, "img/hero.png", "img/cars.png", "img/enemy1.png", "audio/gameMusic.mp3", "audio/gameOver.mp3"
               , "audio/DIALBEEP1.mp3", "audio/DIALBEEP2.mp3", "audio/DIALBEEP3.mp3", "audio/DIALBEEP4.mp3", "audio/DIALBEEP5.mp3", "audio/DIALBEEP6.mp3", "audio/DIALBEEP7.mp3"
@@ -115,6 +118,11 @@ window.onload = function() {
               enemyToDestroy.destroyEnemy();
               this.enemies.splice(this.targetEnemyIndices[i], 1);
               this.enemiesKilled += 1;
+
+              if (this.enemiesKilled % ENEMY_BOSS_FREQUENCY == 0) {
+                this.spawnBoss();
+              }
+
               if (this.enemiesKilled % ENEMY_RESPAWN_FACTOR == 0) {
                 this.spawnEnemy();
               }
@@ -201,6 +209,21 @@ window.onload = function() {
 
       this.enemies.push(Crafty.e("Enemy").difficulty(difficulty).setSpeed(speed).attr({x: x, y: y}));
     },
+
+    spawnBoss: function() {
+      var x = 0,
+          y = 0;
+
+      do {
+        x = Crafty.math.randomInt(WALL_SIZE, WORLD_WIDTH - WALL_SIZE - ENEMY_WIDTH);
+        y = Crafty.math.randomInt(WALL_SIZE, WORLD_HEIGHT - WALL_SIZE - ENEMY_HEIGHT);
+      } while ( x >= -Crafty.viewport.x - ENEMY_WIDTH &&
+                x <= -Crafty.viewport.x + VIEWPORT_WIDTH &&
+                y >= -Crafty.viewport.y - ENEMY_HEIGHT &&
+                y <= -Crafty.viewport.y + VIEWPORT_HEIGHT );
+
+      this.enemies.push(Crafty.e("Enemy").difficulty(ENEMY_BOSS_DIFFICULTY).setSpeed(ENEMY_BOSS_SPEED).attr({x: x, y: y}));
+    },
     
     startGame: function() {
       this.setViewport();
@@ -284,6 +307,12 @@ window.onload = function() {
             this.die();
           }
         })
+        .bind("EnterFrame", function(e) {
+          if (this.dead) {
+            this.x = this.deathPosition.x;
+            this.y = this.deathPosition.y;
+          }
+        })
         .bind("NewDirection", function(direction) {
           if (direction.x == 0 && direction.y == 0) {
             this.stop();
@@ -309,14 +338,29 @@ window.onload = function() {
             this.rotation = 90;
           }
         });
+
+      this.dead = false;
     },
 
     die: function() {
+      if (this.dead) {
+        return;
+      }
+      this.dead = true;
+      this.deathPosition = {x: this.x, y: this.y};
       highScore = Math.max(highScore, score);
       if (score == highScore) {
         localStorage.setItem("highScore", highScore);
       }
-      Crafty.scene("gameOver");
+
+      Crafty.e("Explosion")
+        .attr({x: this.x, y: this.y, z: 9001});
+
+      var player = this;
+
+      window.setTimeout( function() { player.destroy(); }, EXPLOSION_DURATION / 4.0 * 3.0 );
+      
+      window.setTimeout( function() { Crafty.scene("gameOver"); }, 1500);
     }
   });
   
