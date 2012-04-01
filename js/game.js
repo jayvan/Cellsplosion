@@ -18,10 +18,25 @@ window.onload = function() {
       WALL_HORIZONTAL_IMAGE     = 'img/wall_horizontal.gif',
       WALL_VERTICAL_IMAGE       = 'img/wall_vertical.gif',
       PARKING_IMAGE             = 'img/parking_lines.png',
-      NUM_DIAL_BEEPS            = 7;
+      NUM_DIAL_BEEPS            = 7,
+      NUM_ZOMBIE_SOUNDS         = 7;
 
   Crafty.init(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
   Crafty.background("grey");
+
+  var fadeIn = function(name, vol, maxVol) {
+    if (typeof(vol) === "undefined") {
+      vol = 0;
+    }
+    if (maxVol > 1) {
+      maxVol = 1;
+    }
+    vol += 0.1;
+    if (vol <= maxVol) {
+      Crafty.audio.settings(name, {volume: vol});
+      window.setTimeout(function() { fadeIn(name, vol, maxVol) }, 300);
+    }
+  };
   
   var score;
   // Load high score
@@ -60,7 +75,9 @@ window.onload = function() {
           }
           // Go through and delete all of the targets that were not valid IF there is one or more valid targets
           if (validEnemyIndices.length >= 1) {
-            Crafty.audio.play("dialBeep" + Crafty.math.randomInt(1,NUM_DIAL_BEEPS).toString(), 0);
+            var randomDialBeep = "dialBeep" + Crafty.math.randomInt(1,NUM_DIAL_BEEPS).toString();
+            Crafty.audio.settings(randomDialBeep, {volume: 0.5});
+            Crafty.audio.play(randomDialBeep, 0);
             this.appendToTypedNumber(number);
             for (var i = invalidEnemyIndices.length - 1; i >= 0; i--) {
               this.enemies[invalidEnemyIndices[i]].resetCurDigitIndex();
@@ -73,6 +90,7 @@ window.onload = function() {
           for (var i = this.targetEnemyIndices.length - 1; i >= 0; i--) {
             if (this.enemies[this.targetEnemyIndices[i]].checkIfNumberComplete()) {
               // TODO: Change hardcoded enemy kill score
+              Crafty.audio.play("zombie" + Crafty.math.randomInt(1,NUM_ZOMBIE_SOUNDS).toString(), 0);
               this.addToScore(10);
               this.enemies[this.targetEnemyIndices[i]].destroyEnemy();
               this.enemies.splice(this.targetEnemyIndices[i], 1);
@@ -338,8 +356,9 @@ window.onload = function() {
   });
 
   Crafty.scene("gameOver", function() {
-    Crafty.audio.settings("gameMusic", {muted: true});
+    Crafty.audio.settings("gameMusic", {volume: 0});
     Crafty.audio.play("gameOver", 0);
+    fadeIn("gameOver", 0, 0.7);
 
     Crafty.viewport.x = 0;
     Crafty.viewport.y = 0;
@@ -362,6 +381,8 @@ window.onload = function() {
       })
       .bind("KeyDown", function(e) {
         if (e.key == Crafty.keys['ENTER']) {
+          Crafty.audio.settings("gameOver", {volume: 0});
+          fadeIn("gameMusic", 0, 0.7);
           Crafty.scene("main");
         }
       });
@@ -373,28 +394,17 @@ window.onload = function() {
     Crafty.sprite(80, 139, "img/cars.png", {RedCarSprite: [0, 0], BlueCarSprite: [1, 0], GreenCarSprite: [2, 0]}, 10, 0);
 
     // Load dial beeps
-    for (var i = 1; i <= 7; i++) {
+    for (var i = 1; i <= NUM_DIAL_BEEPS; i++) {
       Crafty.audio.add("dialBeep" + i.toString(), "audio/DIALBEEP" + i.toString() + '.mp3');
+    }
+    
+    for (var i = 1; i <= NUM_ZOMBIE_SOUNDS; i++) {
+      Crafty.audio.add("zombie" + i.toString(), "audio/ZOMBIE" + i.toString() + '.mp3');
     }
 
     Crafty.audio.add("gameMusic", "audio/gameMusic.mp3");
     Crafty.audio.play("gameMusic", -1);
-    // Crafty.audio.settings("gameMusic", {volume: 0});
-
-    var fadeIn = function(name, vol) {
-      if (typeof(vol) === "undefined") {
-        vol = 0;
-      }
-      vol += 0.1;
-      console.log(vol);
-      Crafty.audio.settings(name, {volume: vol});
-      if (vol != 1) {
-        window.setTimeout(function() { fadeIn(name, vol) }, 300);
-      }
-    }
-    fadeIn("gameMusic");
-
-    
+    fadeIn("gameMusic", 0, 0.7);
 
     Crafty.audio.add("gameOver", "audio/gameOver.mp3");
 
