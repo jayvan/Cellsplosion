@@ -18,9 +18,9 @@ window.onload = function() {
       WALL_HORIZONTAL_IMAGE     = 'img/wall_horizontal.gif',
       WALL_VERTICAL_IMAGE       = 'img/wall_vertical.gif',
       PARKING_IMAGE             = 'img/parking_lines.png',
-      NUM_DIAL_BEEPS            = 5,
+      NUM_DIAL_BEEPS            = 7,
       NUM_ZOMBIE_SOUNDS         = 7,
-      NUM_ERROR_SOUNDS          = 2;
+      NUM_ERROR_SOUNDS          = 4;
 
   var ASSETS = [ FLOOR_IMAGE, WALL_VERTICAL_IMAGE, WALL_HORIZONTAL_IMAGE, PARKING_IMAGE, "img/hero.png", "img/cars.png", "img/enemy1.png", "audio/gameMusic.mp3", "audio/gameOver.mp3"
               , "audio/DIALBEEP1.mp3", "audio/DIALBEEP2.mp3", "audio/DIALBEEP3.mp3", "audio/DIALBEEP4.mp3", "audio/DIALBEEP5.mp3", "audio/DIALBEEP6.mp3", "audio/DIALBEEP7.mp3"
