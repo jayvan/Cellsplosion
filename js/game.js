@@ -23,7 +23,8 @@ window.onload = function() {
       NUM_ERROR_SOUNDS          = 4,
       ENEMY_SPEEDS              = {4: 0.01, 3: 0.05, 2: 0.14, 1: 0.8}
       ENEMY_DIFFICULTIES        = {7: 0.01, 6: 0.05, 5: 0.10, 4: 0.14, 3: 0.7}
-      ENEMY_RESPAWN_FACTOR      = 5;
+      ENEMY_RESPAWN_FACTOR      = 5,
+      EXPLOSION_DURATION        = 400;
 
   var ASSETS = [ FLOOR_IMAGE, WALL_VERTICAL_IMAGE, WALL_HORIZONTAL_IMAGE, PARKING_IMAGE, "img/hero.png", "img/cars.png", "img/enemy1.png", "audio/gameMusic.mp3", "audio/gameOver.mp3"
               , "audio/DIALBEEP1.mp3", "audio/DIALBEEP2.mp3", "audio/DIALBEEP3.mp3", "audio/DIALBEEP4.mp3", "audio/DIALBEEP5.mp3", "audio/DIALBEEP6.mp3", "audio/DIALBEEP7.mp3"
@@ -273,7 +274,11 @@ window.onload = function() {
         .origin(PLAYER_WIDTH / 2, PLAYER_HEIGHT / 2)
         .multiway(PLAYER_SPEED, {W: -90, S: 90, D: 0, A: 180})
         .animate('PlayerWalk', 0, 0, 3)
-        .collision().onHit("Enemy", this.die)
+        .collision().onHit("Enemy", function(e) { 
+          if (!e[0].obj.dead) {
+            this.die();
+          }
+        })
         .bind("NewDirection", function(direction) {
           if (direction.x == 0 && direction.y == 0) {
             this.stop();
@@ -320,6 +325,7 @@ window.onload = function() {
         .origin(ENEMY_WIDTH / 2, ENEMY_HEIGHT / 2);
       this.curDigitIndex = 0;
       this.speed = 0;
+      this.dead = false;
     },
 
     update: function(player) {
@@ -361,7 +367,6 @@ window.onload = function() {
     },
 
     setSpeed: function(targetSpeed) {
-      console.log(this[0], "speed is now", parseInt(targetSpeed));
       this.speed = parseInt(targetSpeed);
       return this;
     },
@@ -392,11 +397,13 @@ window.onload = function() {
     },
     
     destroyEnemy: function() {
+      this.dead = true;
       Crafty.e("Explosion")
         .attr({x: this.x, y: this.y});
 
       this.numberRef.destroy();
-      this.destroy();
+      var enemy = this;
+      window.setTimeout( function() { enemy.destroy(); }, EXPLOSION_DURATION / 4.0 * 3.0 );
     }
   });
 
@@ -404,10 +411,10 @@ window.onload = function() {
     init: function() {
       this.addComponent("2D, DOM, Explosion1, SpriteAnimation")
         .animate('Explode', 0, 0, 3)
-        .animate('Explode', 30, 1)
+        .animate('Explode', 50 * EXPLOSION_DURATION / 1000, 1)
         .attr({w: 100, h: 100});
       var explosion = this;
-      window.setTimeout( function() { explosion.destroy();}, 600);
+      window.setTimeout( function() { explosion.destroy();}, EXPLOSION_DURATION);
     }
   });
   
