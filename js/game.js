@@ -81,9 +81,11 @@ window.onload = function() {
           }
           // Go through and delete all of the targets that were not valid IF there is one or more valid targets
           if (validEnemyIndices.length >= 1) {
-            var randomDialBeep = "dialBeep" + Crafty.math.randomInt(1,NUM_DIAL_BEEPS).toString();
-            Crafty.audio.settings(randomDialBeep, {volume: 0.5});
-            Crafty.audio.play(randomDialBeep, 0);
+            try {
+              var randomDialBeep = "dialBeep" + Crafty.math.randomInt(1,NUM_DIAL_BEEPS).toString();
+              Crafty.audio.settings(randomDialBeep, {volume: 0.5});
+              Crafty.audio.play(randomDialBeep, 0);
+            } catch (e) { }
             this.appendToTypedNumber(number);
             for (var i = invalidEnemyIndices.length - 1; i >= 0; i--) {
               this.enemies[invalidEnemyIndices[i]].resetCurDigitIndex();
@@ -98,7 +100,10 @@ window.onload = function() {
             if (this.enemies[this.targetEnemyIndices[i]].checkIfNumberComplete()) {
               killedEnemy = true;
               // TODO: Change hardcoded enemy kill score
-              Crafty.audio.play("zombie" + Crafty.math.randomInt(1,NUM_ZOMBIE_SOUNDS).toString(), 0);
+              try {
+                Crafty.audio.play("zombie" + Crafty.math.randomInt(1,NUM_ZOMBIE_SOUNDS).toString(), 0);
+              }
+              catch(e) {}
               this.addToScore(10);
               this.enemies[this.targetEnemyIndices[i]].destroyEnemy();
               this.enemies.splice(this.targetEnemyIndices[i], 1);
@@ -113,7 +118,9 @@ window.onload = function() {
             this.targetEnemyIndices.push(i);
           }
           if (!killedEnemy) {
-            Crafty.audio.play("error" + Crafty.math.randomInt(1,NUM_ERROR_SOUNDS).toString(), 0);
+            try {
+              Crafty.audio.play("error" + Crafty.math.randomInt(1,NUM_ERROR_SOUNDS).toString(), 0);
+            } catch (e) { }
           }
         }
       });
@@ -366,8 +373,12 @@ window.onload = function() {
   });
 
   Crafty.scene("gameOver", function() {
+    Crafty(Crafty("World")[0]).destroy();
+
     Crafty.audio.settings("gameMusic", {volume: 0});
-    Crafty.audio.play("gameOver", 0);
+    try {
+      Crafty.audio.play("gameOver", 0);
+    } catch (e) { }
     fadeIn("gameOver", 0, 0.7);
 
     Crafty.viewport.x = 0;
