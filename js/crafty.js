@@ -6732,7 +6732,7 @@ Crafty.extend({
 				var j = 0;
 				//i is still set to the sound we played
 				sounds[i].addEventListener('ended', function () {
-					if (repeat == -1 || j <= repeat) {
+					if (repeat == -1 || j < repeat) {
 						this.currentTime = 0;
             this.play();
 						j++;

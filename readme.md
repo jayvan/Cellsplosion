@@ -53,3 +53,6 @@ Spawning:
 * Try viewport follow
 
 ** Trim the sprite to reduce collision box size
+
+
+*** Pull request for music repeat

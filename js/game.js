@@ -41,6 +41,8 @@ window.onload = function() {
       this.targetEnemyIndices = [];
       this.typedNumber = "";
 
+      Crafty.audio.settings("gameMusic", {muted: false});
+
       this.bind("KeyDown", function(e) {
         if (e.key >= Crafty.keys['NUMPAD_0'] && e.key <= Crafty.keys['NUMPAD_9']) {
           var number = e.key - Crafty.keys['NUMPAD_0'];
@@ -326,6 +328,9 @@ window.onload = function() {
   });
 
   Crafty.scene("gameOver", function() {
+    Crafty.audio.settings("gameMusic", {muted: true});
+    Crafty.audio.play("gameOver", 0);
+    
     Crafty.viewport.x = 0;
     Crafty.viewport.y = 0;
     var gameOverText = "";
@@ -350,6 +355,11 @@ window.onload = function() {
   Crafty.scene("loading", function() {
     Crafty.sprite(100, 70, "img/hero.png", {PlayerSprite: [0, 0]});
     Crafty.sprite(100, 77, "img/enemy1.png", {EnemySprite: [0, 0]});
+    Crafty.audio.add("gameMusic", "audio/gameMusic.mp3");
+    Crafty.audio.play("gameMusic", -1);
+    Crafty.audio.settings("gameMusic", {muted: true});
+
+    Crafty.audio.add("gameOver", "audio/gameOver.mp3");
 
     Crafty.e("2D, Color, DOM, Text, Mouse")
       .attr({w: 300, h: 100, x: HALF_VIEWPORT_HEIGHT, y: HALF_VIEWPORT_HEIGHT})
