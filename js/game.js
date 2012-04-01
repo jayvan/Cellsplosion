@@ -28,7 +28,7 @@ window.onload = function() {
   var ASSETS = [ FLOOR_IMAGE, WALL_VERTICAL_IMAGE, WALL_HORIZONTAL_IMAGE, PARKING_IMAGE, "img/hero.png", "img/cars.png", "img/enemy1.png", "audio/gameMusic.mp3", "audio/gameOver.mp3"
               , "audio/DIALBEEP1.mp3", "audio/DIALBEEP2.mp3", "audio/DIALBEEP3.mp3", "audio/DIALBEEP4.mp3", "audio/DIALBEEP5.mp3", "audio/DIALBEEP6.mp3", "audio/DIALBEEP7.mp3"
               , "audio/ZOMBIE1.mp3", "audio/ZOMBIE2.mp3", "audio/ZOMBIE3.mp3", "audio/ZOMBIE4.mp3", "audio/ZOMBIE5.mp3", "audio/ZOMBIE6.mp3", "audio/ZOMBIE7.mp3"
-              , "audio/ERROR1.mp3", "audio/ERROR2.mp3", "audio/ERROR3.mp3", "audio/ERROR4.mp3"];
+              , "audio/ERROR1.mp3", "audio/ERROR2.mp3", "audio/ERROR3.mp3", "audio/ERROR4.mp3", "img/explosion1.png"];
   Crafty.audio.MAX_CHANNELS = 1;
   Crafty.init(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
   Crafty.background("grey");
@@ -402,11 +402,12 @@ window.onload = function() {
 
   Crafty.c("Explosion", {
     init: function() {
-      this.addComponent("2D, DOM, Color")
-        .color("red")
+      this.addComponent("2D, DOM, Explosion1, SpriteAnimation")
+        .animate('Explode', 0, 0, 3)
+        .animate('Explode', 30, 1)
         .attr({w: 100, h: 100});
       var explosion = this;
-      window.setTimeout( function() { explosion.destroy();}, 1000);
+      window.setTimeout( function() { explosion.destroy();}, 600);
     }
   });
   
@@ -507,6 +508,7 @@ window.onload = function() {
         Crafty.sprite(100, 70, "img/hero.png", {PlayerSprite: [0, 0]});
         Crafty.sprite(100, 77, "img/enemy1.png", {EnemySprite: [0, 0]});
         Crafty.sprite(80, 139, "img/cars.png", {RedCarSprite: [0, 0], BlueCarSprite: [1, 0], GreenCarSprite: [2, 0]}, 10, 0);
+        Crafty.sprite(100, 100, "img/explosion1.png", {Explosion1: [0, 0]});
 
         Crafty.scene("landing");
       },
