@@ -155,7 +155,7 @@ window.onload = function() {
                 try {
                   Crafty.audio.play("bossAlert", 0);
                 } catch (e) { }
-                $('#warning').animate({opacity: 0.3}, 490).animate({opacity: 0}, 400).animate({opacity: 0.3}, 200).animate({opacity: 0}, 400);
+                $('#warning').animate({opacity: 0.3}, 200).animate({opacity: 0}, 400).animate({opacity: 0.3}, 200).animate({opacity: 0}, 400);
                 this.spawnBoss();
               } 
 
@@ -248,7 +248,7 @@ window.onload = function() {
         difficulty = Math.min(difficulty, EASY_ENEMY_MAX_DIFFICULTY);
       }
 
-      this.enemies.push(Crafty.e("Enemy").difficulty(difficulty).setSpeed(speed).attr({x: x, y: y}));
+      this.enemies.push(Crafty.e("Enemy").addComponent("EnemySprite").difficulty(difficulty).setSpeed(speed).attr({x: x, y: y}).animate('EnemyWalk', 0, 0, 3).animate('EnemyWalk', 30, -1));
     },
 
     spawnBoss: function() {
@@ -262,8 +262,16 @@ window.onload = function() {
                 x <= -Crafty.viewport.x + VIEWPORT_WIDTH &&
                 y >= -Crafty.viewport.y - ENEMY_HEIGHT &&
                 y <= -Crafty.viewport.y + VIEWPORT_HEIGHT );
+      var boss = Crafty.e("Enemy")
+        .addComponent("BossSprite")
+        .difficulty(ENEMY_BOSS_DIFFICULTY)
+        .setSpeed(ENEMY_BOSS_SPEED)
+        .attr({x: x, y: y})
+        .stop()
+        .animate('BossWalk', 0, 0, 3)
+        .animate('BossWalk', 15, -1);
 
-      this.enemies.push(Crafty.e("Enemy").difficulty(ENEMY_BOSS_DIFFICULTY).setSpeed(ENEMY_BOSS_SPEED).attr({x: x, y: y}));
+      this.enemies.push(boss);
     },
     
     startGame: function() {
@@ -434,8 +442,6 @@ window.onload = function() {
     
     init: function() {
       this.addComponent("2D, DOM, Collision, SpriteAnimation, EnemySprite")
-        .animate('EnemyWalk', 0, 0, 3)
-        .animate('EnemyWalk', 30, -1)
         .attr({w: ENEMY_WIDTH, h: ENEMY_HEIGHT})
         .origin(ENEMY_WIDTH / 2, ENEMY_HEIGHT / 2);
       this.curDigitIndex = 0;
@@ -628,12 +634,13 @@ window.onload = function() {
     }
     Crafty.audio.add("gameMusic", "audio/gameMusic.mp3");
     Crafty.audio.add("gameOver", "audio/gameOver.mp3");
-    Crafty.audio.add("bossAlert", "audio/siren.mp3");
+    Crafty.audio.add("bossAlert", "audio/siren.wav");
     Crafty.audio.add("playerDeath", "audio/scream.wav");
 
     // Load sprites
     Crafty.sprite(100, 70, "img/hero.png", {PlayerSprite: [0, 0]});
     Crafty.sprite(100, 77, "img/enemy1.png", {EnemySprite: [0, 0]});
+    Crafty.sprite(100, 100, "img/enemy2.png", {BossSprite: [0, 0]});
     Crafty.sprite(80, 139, "img/cars.png", {RedCarSprite: [0, 0], BlueCarSprite: [1, 0], GreenCarSprite: [2, 0]}, 10, 0);
     Crafty.sprite(100, 100, "img/explosion1.png", {Explosion1: [0, 0]});
 
