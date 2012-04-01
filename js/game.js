@@ -24,8 +24,8 @@ window.onload = function() {
       NUM_DIAL_BEEPS            = 7,
       NUM_ZOMBIE_SOUNDS         = 7,
       NUM_ERROR_SOUNDS          = 4,
-      ENEMY_SPEEDS              = {4: 0.01, 3: 0.05, 2: 0.14, 1: 0.8}
-      ENEMY_DIFFICULTIES        = {7: 0.01, 6: 0.05, 5: 0.10, 4: 0.14, 3: 0.7}
+      ENEMY_SPEEDS              = {4: 0.01, 3: 0.05, 2: 0.14, 1: 0.8},
+      ENEMY_DIFFICULTIES        = {7: 0.01, 6: 0.05, 5: 0.10, 4: 0.14, 3: 0.7},
       ENEMY_RESPAWN_FACTOR      = 2,
       EXPLOSION_DURATION        = 400,
       PLAYER_HITCIRCLE_RADIUS   = 50,
@@ -35,15 +35,15 @@ window.onload = function() {
 
   var ASSETS = [ FLOOR_IMAGE, WALL_VERTICAL_IMAGE, WALL_HORIZONTAL_IMAGE, PARKING_IMAGE, "img/hero.png", "img/cars.png", "img/enemy1.png", "audio/gameMusic.mp3", "audio/gameOver.mp3"
               , "audio/DIALBEEP1.mp3", "audio/DIALBEEP2.mp3", "audio/DIALBEEP3.mp3", "audio/DIALBEEP4.mp3", "audio/DIALBEEP5.mp3", "audio/DIALBEEP6.mp3", "audio/DIALBEEP7.mp3"
-              , "audio/ZOMBIE1.mp3", "audio/ZOMBIE2.mp3", "audio/ZOMBIE3.mp3", "audio/ZOMBIE4.mp3", "audio/ZOMBIE5.mp3", "audio/ZOMBIE6.mp3", "audio/ZOMBIE7.mp3"
-              , "audio/ERROR1.mp3", "audio/ERROR2.mp3", "audio/ERROR3.mp3", "audio/ERROR4.mp3", "img/explosion1.png", INTRO_IMAGE, GAME_OVER_IMAGE];
+              , "audio/ZOMBIE1.mp3", "audio/ZOMBIE2.mp3", "audio/ZOMBIE3.mp3", "audio/ZOMBIE4.mp3", "audio/ZOMBIE5.mp3", "audio/ZOMBIE6.mp3", "audio/ZOMBIE7.mp3", 'audio/siren.mp3'
+              , 'audio/death.mp3', "audio/ERROR1.mp3", "audio/ERROR2.mp3", "audio/ERROR3.mp3", "audio/ERROR4.mp3", "img/explosion1.png", INTRO_IMAGE, GAME_OVER_IMAGE];
 
   var GAME_OVER_QUOTES = [ "Looks like this game<br />played you.",
                            "Looks like this number is<br />out of service.",
                            "This lifeline has been<br />disconnected.",
                            "Looks like somebody<br />forgot to call 911.",
                            "Looks like you've been put<br />on hold.",
-                           "That's one number you can't<br />call collect." ]
+                           "That's one number you can't<br />call collect." ];
 
   Crafty.audio.MAX_CHANNELS = 1;
   Crafty.init(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
@@ -59,7 +59,7 @@ window.onload = function() {
     vol = Math.min(vol + 0.1, maxVol);
     Crafty.audio.settings(name, {volume: vol});
     if (vol != maxVol) {
-      window.setTimeout(function() { fadeIn(name, vol, maxVol) }, 300);
+      window.setTimeout(function() { fadeIn(name, vol, maxVol); }, 300);
     }
   };
   
@@ -87,8 +87,17 @@ window.onload = function() {
       Crafty.audio.settings("gameMusic", {volume: 1.0});
 
       this.bind("KeyDown", function(e) {
+        var number = -1;
+
         if (e.key >= Crafty.keys['NUMPAD_0'] && e.key <= Crafty.keys['NUMPAD_9']) {
-          var number = e.key - Crafty.keys['NUMPAD_0'];
+          number = e.key - Crafty.keys['NUMPAD_0'];
+        }
+
+        if (e.key >= Crafty.keys['0'] && e.key <= Crafty.keys['9']) {
+          number = e.key - Crafty.keys['0'];
+        }
+
+        if (number != -1) {
           var validEnemyIndices = [];
           var invalidEnemyIndices = [];
           
