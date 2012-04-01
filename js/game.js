@@ -20,6 +20,9 @@ window.onload = function() {
       PARKING_IMAGE             = 'img/parking_lines.png',
       NUM_DIAL_BEEPS            = 7;
 
+  var ASSETS = [ FLOOR_IMAGE, WALL_VERTICAL_IMAGE, WALL_HORIZONTAL_IMAGE, PARKING_IMAGE, "img/hero.png", "img/cars.png", "img/enemy1.png", "audio/gameMusic.mp3", "audio/gameOver.mp3"
+              , "audio/DIALBEEP1.mp3", "audio/DIALBEEP2.mp3", "audio/DIALBEEP3.mp3", "audio/DIALBEEP4.mp3", "audio/DIALBEEP5.mp3", "audio/DIALBEEP6.mp3", "audio/DIALBEEP7.mp3"];
+
   Crafty.init(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
   Crafty.background("grey");
   
@@ -29,6 +32,21 @@ window.onload = function() {
 
   if (highScore == null) {
     highScore = 0;
+  }
+
+  // Sound Management
+  var fadeIn = function(name, duration, vol) {
+    if (typeof(vol) === "undefined") {
+      vol = 0;
+    }
+    if (typeof(duration) === "undefined") {
+      duration = 2000;
+    }
+    vol = Math.min(vol + 0.1, 1);
+    Crafty.audio.settings(name, {volume: vol});
+    if (vol < 1) {
+      window.setTimeout(function() { fadeIn(name, duration, vol) }, duration / 10);
+    }
   }
 
   Crafty.c("World", {
@@ -363,40 +381,14 @@ window.onload = function() {
       .bind("KeyDown", function(e) {
         if (e.key == Crafty.keys['ENTER']) {
           Crafty.scene("main");
+          Crafty.audio.settings("gameMusic", {muted: false});
         }
       });
   });
 
-  Crafty.scene("loading", function() {
-    Crafty.sprite(100, 70, "img/hero.png", {PlayerSprite: [0, 0]});
-    Crafty.sprite(100, 77, "img/enemy1.png", {EnemySprite: [0, 0]});
-    Crafty.sprite(80, 139, "img/cars.png", {RedCarSprite: [0, 0], BlueCarSprite: [1, 0], GreenCarSprite: [2, 0]}, 10, 0);
-
-    // Load dial beeps
-    for (var i = 1; i <= 7; i++) {
-      Crafty.audio.add("dialBeep" + i.toString(), "audio/DIALBEEP" + i.toString() + '.mp3');
-    }
-
-    Crafty.audio.add("gameMusic", "audio/gameMusic.mp3");
-    Crafty.audio.play("gameMusic", -1);
-    // Crafty.audio.settings("gameMusic", {volume: 0});
-
-    var fadeIn = function(name, vol) {
-      if (typeof(vol) === "undefined") {
-        vol = 0;
-      }
-      vol += 0.1;
-      console.log(vol);
-      Crafty.audio.settings(name, {volume: vol});
-      if (vol != 1) {
-        window.setTimeout(function() { fadeIn(name, vol) }, 300);
-      }
-    }
-    fadeIn("gameMusic");
-
-    
-
-    Crafty.audio.add("gameOver", "audio/gameOver.mp3");
+  Crafty.scene("landing", function() {
+    Crafty.audio.play("gameMusic", -1).settings('gameMusic', {loop: true});
+    fadeIn("gameMusic", 3000);
 
     Crafty.e("2D, Color, DOM, Text, Mouse")
       .attr({w: 300, h: 100, x: HALF_VIEWPORT_HEIGHT, y: HALF_VIEWPORT_HEIGHT})
@@ -410,6 +402,36 @@ window.onload = function() {
           Crafty.scene("main");
         }
       });
+  });
+
+  Crafty.scene("loading", function() {
+    var progress = Crafty.e("2D, DOM, Text");
+
+    Crafty.load( ASSETS,
+      function() {
+        // Load Audio
+        for (var i = 1; i <= 7; i++) {
+          Crafty.audio.add("dialBeep" + i.toString(), "audio/DIALBEEP" + i.toString() + '.mp3');
+        }
+        Crafty.audio.add("gameMusic", "audio/gameMusic.mp3");
+        Crafty.audio.add("gameOver", "audio/gameOver.mp3");
+
+        // Load sprites
+        Crafty.sprite(100, 70, "img/hero.png", {PlayerSprite: [0, 0]});
+        Crafty.sprite(100, 77, "img/enemy1.png", {EnemySprite: [0, 0]});
+        Crafty.sprite(80, 139, "img/cars.png", {RedCarSprite: [0, 0], BlueCarSprite: [1, 0], GreenCarSprite: [2, 0]}, 10, 0);
+
+        Crafty.scene("landing");
+      },
+
+      function(e) {
+        progress.text(e.loaded + " / " + e.total);
+      },
+
+      function(e) {
+        console.log("Error Loading");
+      }
+    );
   });
   
   Crafty.scene("loading");
