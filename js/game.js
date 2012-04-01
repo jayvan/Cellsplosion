@@ -16,7 +16,8 @@ window.onload = function() {
       INITIAL_ENEMY_COUNT       = 25,
       FLOOR_IMAGE               = 'img/ground.gif',
       WALL_HORIZONTAL_IMAGE     = 'img/wall_horizontal.gif',
-      WALL_VERTICAL_IMAGE       = 'img/wall_vertical.gif';
+      WALL_VERTICAL_IMAGE       = 'img/wall_vertical.gif',
+      PARKING_IMAGE             = 'img/parking_lines.png';
 
   Crafty.init(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
   Crafty.background("grey");
@@ -32,6 +33,7 @@ window.onload = function() {
   Crafty.c("World", {
     init: function() {
       score = 0;
+      this.addToScore(0);
 
       this.player = Crafty.e("Player");
       
@@ -139,6 +141,10 @@ window.onload = function() {
        .attr({w: WORLD_WIDTH, h: WORLD_HEIGHT, z: -5})
        .image(FLOOR_IMAGE, "repeat");
 
+      Crafty.e("2D, DOM, Image")
+        .attr({w: WORLD_WIDTH, h: WORLD_HEIGHT, z: -4})
+        .image(PARKING_IMAGE, "repeat");
+
       // Create the walls
       // Left
       Crafty.e("2D, DOM, Image")
@@ -172,7 +178,7 @@ window.onload = function() {
 
     addToScore: function(pointsToAdd) {
       score += pointsToAdd;
-      $("#score .num").text(score);
+      $("#score-box .number").text(score);
     },
 
     debug: function() {

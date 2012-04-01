@@ -2,6 +2,10 @@
   line-height: normal !important;
 }
 
+body {
+  background: black;
+}
+
 .Number {
   color: blue;
   text-align: center;
@@ -10,10 +14,20 @@
   font-family: Arial;
   background: white;
   line-height: normal !important;
+  border-radius: 10px;
 }
 
 .typed {
   color: orange;
+}
+
+#border-image {
+  width: 800px;
+  height: 600px;
+  position: absolute;
+  background-image: url('../img/border.png');
+  z-index: 500;
+  pointer-events: none;
 }
 
 #cr-stage {
@@ -26,4 +40,23 @@
   width: 200px;
   height: 600px;
   background-color: black;
+}
+
+#score-box {
+  background-image: url('../img/score_card.png');
+  width: 181px;
+  height: 60px;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  font-family: "Lcdphone", monospace;
+  color: #6DF6F0;
+  z-index: 501;
+}
+
+#score-box .number{
+  font-size: 26px;
+  padding-top: 18px;
+  text-align: right;
+  padding-right: 20px;
 }
