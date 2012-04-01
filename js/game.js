@@ -13,14 +13,17 @@ window.onload = function() {
       WALL_SIZE                 = 50,
       PLAYER_WIDTH              = 100,
       PLAYER_HEIGHT             = 70,
-      INITIAL_ENEMY_COUNT       = 25,
+      INITIAL_ENEMY_COUNT       = 5,
       FLOOR_IMAGE               = 'img/ground.gif',
       WALL_HORIZONTAL_IMAGE     = 'img/wall_horizontal.gif',
       WALL_VERTICAL_IMAGE       = 'img/wall_vertical.gif',
       PARKING_IMAGE             = 'img/parking_lines.png',
       NUM_DIAL_BEEPS            = 7,
       NUM_ZOMBIE_SOUNDS         = 7,
-      NUM_ERROR_SOUNDS          = 4;
+      NUM_ERROR_SOUNDS          = 4,
+      ENEMY_SPEEDS              = {4: 0.01, 3: 0.05, 2: 0.14, 1: 0.8}
+      ENEMY_DIFFICULTIES        = {7: 0.01, 6: 0.05, 5: 0.10, 4: 0.14, 3: 0.7}
+      ENEMY_RESPAWN_FACTOR      = 5;
 
   var ASSETS = [ FLOOR_IMAGE, WALL_VERTICAL_IMAGE, WALL_HORIZONTAL_IMAGE, PARKING_IMAGE, "img/hero.png", "img/cars.png", "img/enemy1.png", "audio/gameMusic.mp3", "audio/gameOver.mp3"
               , "audio/DIALBEEP1.mp3", "audio/DIALBEEP2.mp3", "audio/DIALBEEP3.mp3", "audio/DIALBEEP4.mp3", "audio/DIALBEEP5.mp3", "audio/DIALBEEP6.mp3", "audio/DIALBEEP7.mp3"
@@ -62,6 +65,7 @@ window.onload = function() {
       this.enemies = [];
       this.targetEnemyIndices = [];
       this.typedNumber = "";
+      this.enemiesKilled = 0;
 
       Crafty.audio.settings("gameMusic", {volume: 1.0});
 
@@ -104,9 +108,14 @@ window.onload = function() {
                 Crafty.audio.play("zombie" + Crafty.math.randomInt(1,NUM_ZOMBIE_SOUNDS).toString(), 0);
               }
               catch(e) {}
-              this.addToScore(10);
-              this.enemies[this.targetEnemyIndices[i]].destroyEnemy();
+              var enemyToDestroy = this.enemies[this.targetEnemyIndices[i]];
+              this.addToScore(enemyToDestroy.getScore());
+              enemyToDestroy.destroyEnemy();
               this.enemies.splice(this.targetEnemyIndices[i], 1);
+              this.enemiesKilled += 1;
+              if (this.enemiesKilled % ENEMY_RESPAWN_FACTOR == 0) {
+                this.spawnEnemy();
+              }
               this.spawnEnemy();
             }
             else {
@@ -164,7 +173,31 @@ window.onload = function() {
                 y >= -Crafty.viewport.y - ENEMY_HEIGHT &&
                 y <= -Crafty.viewport.y + VIEWPORT_HEIGHT );
 
-      this.enemies.push(Crafty.e("Enemy").difficulty(3).attr({x: x, y: y}));
+      var speed = 0;
+      var speedRoll = Math.random();
+
+      for (var i in ENEMY_SPEEDS) {
+        if (speedRoll <= ENEMY_SPEEDS[i]) {
+          speed = i;
+          break;
+        } else {
+          speedRoll -= ENEMY_SPEEDS[i];
+        }
+      }
+
+      var difficulty = 0;
+      var difficultyRoll = Math.random();
+
+      for (var i in ENEMY_DIFFICULTIES) {
+        if (difficultyRoll <= ENEMY_DIFFICULTIES[i]) {
+          difficulty = i;
+          break;
+        } else {
+          difficultyRoll -= ENEMY_DIFFICULTIES[i];
+        }
+      }
+
+      this.enemies.push(Crafty.e("Enemy").difficulty(difficulty).setSpeed(speed).attr({x: x, y: y}));
     },
     
     startGame: function() {
@@ -285,21 +318,21 @@ window.onload = function() {
         .animate('EnemyWalk', 30, -1)
         .attr({w: ENEMY_WIDTH, h: ENEMY_HEIGHT})
         .origin(ENEMY_WIDTH / 2, ENEMY_HEIGHT / 2);
-
       this.curDigitIndex = 0;
+      this.speed = 0;
     },
 
     update: function(player) {
       if (this.x > player.x) {
-        this.x -= ENEMY_SPEED;
+        this.x -= this.speed;
       } else if (this.x < player.x) {
-        this.x += ENEMY_SPEED;
+        this.x += this.speed;
       }
 
       if (this.y > player.y) {
-        this.y -= ENEMY_SPEED;
+        this.y -= this.speed;
       } else if (this.y < player.y) {
-        this.y += ENEMY_SPEED;
+        this.y += this.speed;
       }
 
       direction = {
@@ -310,6 +343,7 @@ window.onload = function() {
     },
     
     difficulty: function(length) {
+      this.difficulty = length;
       this.number = "";
       for (var i = 0; i < length; i++) {
         this.number += Crafty.math.randomInt(0, 9);
@@ -324,6 +358,16 @@ window.onload = function() {
       this.attach(this.numberRef);
           
       return this;
+    },
+
+    setSpeed: function(targetSpeed) {
+      console.log(this[0], "speed is now", parseInt(targetSpeed));
+      this.speed = parseInt(targetSpeed);
+      return this;
+    },
+
+    getScore: function() {
+      return this.speed * this.difficulty * 10;
     },
     
     tryDigit: function(digit) {
