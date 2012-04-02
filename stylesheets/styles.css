@@ -79,6 +79,10 @@ p {
   width: 398px;
   height: 600px;
   background-image: url('../img/cellphone.png');
+  color: #E4492B;
+  font-family: monospace;
+  font-size: 27px;
+  position: relative;
 }
 
 #score-box {
@@ -107,14 +111,8 @@ p {
 
 #currentNumber {
   top: 279px;
-  position: relative;
+  position: absolute;
   left: 147px;
-}
-
-#info-bar {
-  color: #E4492B;
-  font-family: monospace;
-  font-size: 27px;
 }
 
 #credits {
