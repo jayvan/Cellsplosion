@@ -580,24 +580,24 @@ window.onload = function() {
 
     // Quote
     Crafty.e("2D, DOM, Text")
-      .attr({w: 300, h: 100, x: 403, y: 143, z: 5})
+      .attr({w: 300, h: 100, x: 403, y: 153, z: 5})
       .text(Crafty.math.randomElementOfArray(GAME_OVER_QUOTES))
       .textColor("#000000")
-      .css({'font-size': '24px', 'text-align': 'center'});
+      .css({'font-size': '20px', 'text-align': 'center', 'font-family': 'monospace'});
 
     // Hiscore
     Crafty.e("2D, DOM, Text")
       .attr({w: 300, h: 100, x: 446, y: 225, z: 5})
       .text("<span class='highscore'>High Score:</span> " + highScore)
       .textColor("#000000")
-      .css({'font-size': '24px', 'text-align': 'left'});
+      .css({'font-size': '24px', 'text-align': 'left', 'font-family': 'monospace'});
 
     // Score
     Crafty.e("2D, DOM, Text")
       .attr({w: 300, h: 100, x: 446, y: 255, z: 5})
       .text("<span class='score'>Score:</span> " + score)
       .textColor("#000000")
-      .css({'font-size': '24px', 'text-align': 'left'});
+      .css({'font-size': '24px', 'text-align': 'left', 'font-family': 'monospace'});
 
     // Kills
     Crafty.e("2D, DOM, Text")
