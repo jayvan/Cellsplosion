@@ -446,10 +446,6 @@ window.onload = function() {
       } catch (e) { }
       this.dead = true;
       this.deathPosition = {x: this.x, y: this.y};
-      highScore = Math.max(highScore, score);
-      if (score == highScore) {
-        localStorage.setItem("highScore", highScore);
-      }
 
       Crafty.e("Explosion")
         .attr({x: this.x, y: this.y, z: 9001});
@@ -579,6 +575,12 @@ window.onload = function() {
 
   Crafty.scene("gameOver", function() {
     Crafty(Crafty("World")[0]).destroy();
+
+    highScore = Math.max(highScore, score);
+    if (score == highScore) {
+      localStorage.setItem("highScore", highScore);
+    }
+
     $('#score-box').hide();
     
     Crafty.audio.stop("gameMusic");
