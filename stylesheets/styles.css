@@ -6,6 +6,11 @@ body {
   background: black;
 }
 
+@font-face {
+  font-family: "Lcdphone";
+  src: url('../fonts/lcdphone.ttf') format("truetype");
+}
+
 #explanation {
   width: 800px;
   text-align: center;
@@ -75,13 +80,12 @@ p {
 #info-bar {
   display: inline-block;
   color: #6DF6F0;
-  font-family: monospace;
+  font-family: "Lcdphone", monospace;
   width: 398px;
   height: 600px;
   background-image: url('../img/cellphone.png');
   color: #E4492B;
-  font-family: monospace;
-  font-size: 27px;
+  font-size: 26px;
   position: relative;
 }
 
@@ -110,9 +114,9 @@ p {
 }
 
 #currentNumber {
-  top: 279px;
   position: absolute;
-  left: 147px;
+  top: 281px;
+  left: 143px;
 }
 
 #credits {
