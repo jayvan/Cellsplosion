@@ -1,3 +1,11 @@
+
+// Prevent the spacebar from scrolling the page
+window.onkeydown=function(e){
+  if(e.keyCode==32){
+   return false;
+  }
+};
+
 window.onload = function() {
   var VIEWPORT_WIDTH            = 800,
       VIEWPORT_HEIGHT           = 600,
