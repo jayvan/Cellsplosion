@@ -600,14 +600,14 @@ window.onload = function() {
       .attr({w: 300, h: 100, x: 446, y: 225, z: 5})
       .text("<span class='highscore'>High Score:</span> " + highScore)
       .textColor("#000000")
-      .css({'font-size': '24px', 'text-align': 'left', 'font-family': 'monospace'});
+      .css({'font-size': '24px', 'text-align': 'left'});
 
     // Score
     Crafty.e("2D, DOM, Text")
       .attr({w: 300, h: 100, x: 446, y: 255, z: 5})
       .text("<span class='score'>Score:</span> " + score)
       .textColor("#000000")
-      .css({'font-size': '24px', 'text-align': 'left', 'font-family': 'monospace'});
+      .css({'font-size': '24px', 'text-align': 'left'});
 
     // Kills
     Crafty.e("2D, DOM, Text")
