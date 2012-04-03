@@ -42,12 +42,12 @@ window.onload = function() {
       ENEMY_BOSS_SPEED          = 4,
       ENEMY_BOSS_DIFFICULTY     = 7;
 
-  var GAME_OVER_QUOTES = [ "Looks like this game<br />played you.",
-                           "Looks like this number is<br />out of service.",
-                           "This lifeline has been<br />disconnected.",
-                           "Looks like somebody<br />forgot to call 911.",
-                           "Looks like you've been put<br />on hold.",
-                           "That's one number you can't<br />call collect." ];
+  var GAME_OVER_QUOTES = [ "Looks like this game played you.",
+                           "Looks like this number is out of service.",
+                           "This lifeline has been disconnected.",
+                           "Looks like somebody forgot to call 911.",
+                           "Looks like you've been put on hold.",
+                           "That's one number you can't call collect." ];
 
   Crafty.audio.MAX_CHANNELS = 1;
   Crafty.init(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
@@ -91,6 +91,8 @@ window.onload = function() {
       Crafty.audio.settings("gameMusic", {volume: 1.0});
 
       this.bind("KeyDown", function(e) {
+        console.log(e.key);
+        
         var number = -1;
 
         if (e.key >= Crafty.keys['NUMPAD_0'] && e.key <= Crafty.keys['NUMPAD_9']) {
