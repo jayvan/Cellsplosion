@@ -109,6 +109,20 @@ p {
   padding-right: 20px;
 }
 
+#killStreak {
+  width: 181px;
+  height: 60px;
+  position: absolute;
+  top: 93px;
+  right: 32px;
+  font-family: "Lcdphone", monospace;
+  font-size: 30px;
+  text-align: right;
+  color: yellow;
+  z-index: 501;
+  opacity: 0;
+}
+
 #wrapper {
   width: 1198px;
 }

@@ -44,7 +44,8 @@ window.onload = function() {
       MUSIC_DIRECTORY           = 'audio/music/',
       SOUND_DIRECTORY           = 'audio/sound/',
       KILL_STREAK_MULTIPLIER    = 7,
-      MINIMUM_KILL_STREAK       = 5;
+      MINIMUM_KILL_STREAK       = 5,
+      KILL_STREAK_TIME          = 3000;
 
   var GAME_OVER_QUOTES = [ "Looks like this game played you.",
                            "Looks like this number is out of service.",
@@ -205,6 +206,11 @@ window.onload = function() {
 
               killStreak += 1;
               timeOfLastKill = new Date();
+              if (killStreak >= MINIMUM_KILL_STREAK) {
+                $("#killStreak").html("<span style='font-size: 18px'>x</span>" + killStreak);
+                $("#killStreak").stop().animate({opacity: 1.0}, 100);
+                $("#killStreak").animate({opacity: 0.0}, KILL_STREAK_TIME);
+              }
             }
             else {
               this.enemies[this.targetEnemyIndices[i]].resetCurDigitIndex();
@@ -223,7 +229,7 @@ window.onload = function() {
       });
 
       this.bind("EnterFrame", function() {
-        if (killStreak >= MINIMUM_KILL_STREAK && new Date() - timeOfLastKill >= 5000) {
+        if (killStreak >= MINIMUM_KILL_STREAK && new Date() - timeOfLastKill >= KILL_STREAK_TIME) {
           addToScore(calculateKillStreakScore());
           killStreak = 0;
         }
