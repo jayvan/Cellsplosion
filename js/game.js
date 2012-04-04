@@ -571,6 +571,7 @@ window.onload = function() {
   Crafty.scene("main", function() {
     $("#score-box").show();
     Crafty.e("World");
+    _trackEvent("cell", "play");
   });
 
   Crafty.scene("gameOver", function() {
@@ -598,6 +599,7 @@ window.onload = function() {
           Crafty.audio.play("gameMusic", -1, 0.0);
           fadeIn("gameMusic", 0, 0.7);
           Crafty.scene("main");
+          _trackEvent("cell", "replay");
         }
       });
 
@@ -629,6 +631,7 @@ window.onload = function() {
       .textColor("#000000")
       .css({'font-size': '24px', 'text-align': 'left'});
 
+      _trackEvent("cell", "gameover", "score", score);
   });
 
   Crafty.scene("landing", function() {
