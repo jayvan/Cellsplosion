@@ -42,7 +42,9 @@ window.onload = function() {
       ENEMY_BOSS_SPEED          = 4,
       ENEMY_BOSS_DIFFICULTY     = 7,
       MUSIC_DIRECTORY           = 'audio/music/',
-      SOUND_DIRECTORY           = 'audio/sound/';
+      SOUND_DIRECTORY           = 'audio/sound/',
+      KILL_STREAK_MULTIPLIER    = 7,
+      MINIMUM_KILL_STREAK       = 5;
 
   var GAME_OVER_QUOTES = [ "Looks like this game played you.",
                            "Looks like this number is out of service.",
@@ -84,10 +86,21 @@ window.onload = function() {
         filePath + ".mp3",
         filePath + ".ogg"
         ]);
-  }
+  };
+
+  var addToScore = function(scoreToAdd) {
+    score += scoreToAdd;
+    $("#score-box .number").text(score);
+  };
+
+  var calculateKillStreakScore = function() {
+    return killStreak * killStreak * KILL_STREAK_MULTIPLIER;
+  };
 
   var score;
-  var enemiesKilled = 0;
+  var enemiesKilled;
+  var killStreak;
+  var timeOfLastKill;
   // Load high score
   var highScore = localStorage.getItem("highScore");
 
@@ -98,14 +111,16 @@ window.onload = function() {
   Crafty.c("World", {
     init: function() {
       score = 0;
-      this.addToScore(0);
+      enemiesKilled = 0;
+      killStreak = 0;
+      timeOfLastKill = 0;
+
+      addToScore(0);
 
       this.player = Crafty.e("Player");
-      
       this.enemies = [];
       this.targetEnemyIndices = [];
       this.typedNumber = "";
-      enemiesKilled = 0;
 
       this.bind("KeyDown", function(e) {
         var number = -1;
@@ -170,7 +185,7 @@ window.onload = function() {
               }
               catch(e) {}
               var enemyToDestroy = this.enemies[this.targetEnemyIndices[i]];
-              this.addToScore(enemyToDestroy.getScore());
+              addToScore(enemyToDestroy.getScore());
               enemyToDestroy.destroyEnemy();
               this.enemies.splice(this.targetEnemyIndices[i], 1);
               enemiesKilled += 1;
@@ -187,6 +202,9 @@ window.onload = function() {
                 this.spawnEnemy(false);
               }
               this.spawnEnemy(false);
+
+              killStreak += 1;
+              timeOfLastKill = new Date();
             }
             else {
               this.enemies[this.targetEnemyIndices[i]].resetCurDigitIndex();
@@ -205,6 +223,11 @@ window.onload = function() {
       });
 
       this.bind("EnterFrame", function() {
+        if (killStreak >= MINIMUM_KILL_STREAK && new Date() - timeOfLastKill >= 5000) {
+          addToScore(calculateKillStreakScore());
+          killStreak = 0;
+        }
+
         // Update all of the enemies
         for (var i = 0; i < this.enemies.length; i++) {
           this.enemies[i].update(this.player);
@@ -368,11 +391,6 @@ window.onload = function() {
       $('#currentNumber .num').text(this.typedNumber);
     },
 
-    addToScore: function(pointsToAdd) {
-      score += pointsToAdd;
-      $("#score-box .number").text(score);
-    },
-
     debug: function() {
       console.log("Current Number:", this.typedNumber);
       console.log("Enemies");
@@ -446,6 +464,10 @@ window.onload = function() {
       } catch (e) { }
       this.dead = true;
       this.deathPosition = {x: this.x, y: this.y};
+
+      if (killStreak >= MINIMUM_KILL_STREAK) {
+        addToScore(calculateKillStreakScore());
+      }
 
       Crafty.e("Explosion")
         .attr({x: this.x, y: this.y, z: 9001});
