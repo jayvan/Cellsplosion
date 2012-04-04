@@ -471,15 +471,15 @@ window.onload = function() {
 
     update: function(player) {
       if (this.x > player.x) {
-        this.x -= this.speed;
+        this.x = Math.max(this.x - this.speed, player.x);
       } else if (this.x < player.x) {
-        this.x += this.speed;
+        this.x = Math.min(this.x + this.speed, player.x);
       }
 
       if (this.y > player.y) {
-        this.y -= this.speed;
+        this.y = Math.max(this.y - this.speed, player.y);
       } else if (this.y < player.y) {
-        this.y += this.speed;
+        this.y = Math.min(this.y + this.speed, player.y);
       }
 
       direction = {
