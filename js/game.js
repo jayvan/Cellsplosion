@@ -40,16 +40,28 @@ window.onload = function() {
       PLAYER_HITCIRCLE_RADIUS   = 50,
       ENEMY_BOSS_FREQUENCY      = 25,
       ENEMY_BOSS_SPEED          = 4,
-      ENEMY_BOSS_DIFFICULTY     = 7;
+      ENEMY_BOSS_DIFFICULTY     = 7,
+      MUSIC_DIRECTORY           = 'audio/music/',
+      SOUND_DIRECTORY           = 'audio/sound/';
 
-  var GAME_OVER_QUOTES = [ "Looks like this game<br />played you.",
-                           "Looks like this number is<br />out of service.",
-                           "This lifeline has been<br />disconnected.",
-                           "Looks like somebody<br />forgot to call 911.",
-                           "Looks like you've been put<br />on hold.",
-                           "That's one number you can't<br />call collect." ];
+  var GAME_OVER_QUOTES = [ "Looks like this game played you.",
+                           "Looks like this number is out of service.",
+                           "This lifeline has been disconnected.",
+                           "Looks like somebody forgot to call 911.",
+                           "Looks like you've been put on hold.",
+                           "That's one number you can't call collect." ];
 
-  Crafty.audio.MAX_CHANNELS = 1;
+  var userAgent = navigator.userAgent;
+  var browser = "";
+
+  if (userAgent.indexOf("Chrome") != -1) {
+    browser = "Chrome";
+  } else if (userAgent.indexOf("Firefox") != -1) {
+    browser = "Firefox";
+  } else if (userAgent.indexOf("Safari") != -1) {
+    browser = "Safari";
+  }
+
   Crafty.init(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
   Crafty.background("grey");
 
@@ -61,12 +73,19 @@ window.onload = function() {
       maxVol = 1;
     }
     vol = Math.min(vol + 0.1, maxVol);
-    Crafty.audio.settings(name, {volume: vol});
+    Crafty.audio.setVolume(name, vol);
     if (vol != maxVol) {
       window.setTimeout(function() { fadeIn(name, vol, maxVol); }, 300);
     }
   };
   
+  var loadAudio = function(id, filePath) {
+    Crafty.audio.add(id,[
+        filePath + ".mp3",
+        filePath + ".ogg"
+        ]);
+  }
+
   var score;
   var enemiesKilled = 0;
   // Load high score
@@ -87,8 +106,6 @@ window.onload = function() {
       this.targetEnemyIndices = [];
       this.typedNumber = "";
       enemiesKilled = 0;
-
-      Crafty.audio.settings("gameMusic", {volume: 1.0});
 
       this.bind("KeyDown", function(e) {
         var number = -1;
@@ -133,8 +150,7 @@ window.onload = function() {
           if (validEnemyIndices.length >= 1) {
             try {
               var randomDialBeep = "dialBeep" + Crafty.math.randomInt(1,NUM_DIAL_BEEPS).toString();
-              Crafty.audio.settings(randomDialBeep, {volume: 0.5});
-              Crafty.audio.play(randomDialBeep, 0);
+              Crafty.audio.play(randomDialBeep, 1, 1.0);
             } catch (e) { }
             this.appendToTypedNumber(number);
             for (var i = invalidEnemyIndices.length - 1; i >= 0; i--) {
@@ -150,7 +166,7 @@ window.onload = function() {
             if (this.enemies[this.targetEnemyIndices[i]].checkIfNumberComplete()) {
               killedEnemy = true;
               try {
-                Crafty.audio.play("zombie" + Crafty.math.randomInt(1,NUM_ZOMBIE_SOUNDS).toString(), 0);
+                Crafty.audio.play("zombie" + Crafty.math.randomInt(1,NUM_ZOMBIE_SOUNDS).toString(), 1, 1.0);
               }
               catch(e) {}
               var enemyToDestroy = this.enemies[this.targetEnemyIndices[i]];
@@ -161,7 +177,7 @@ window.onload = function() {
 
               if (enemiesKilled % ENEMY_BOSS_FREQUENCY === 0) {
                 try {
-                  Crafty.audio.play("bossAlert", 0);
+                  Crafty.audio.play("bossAlert", 1, 1.0);
                 } catch (e) { }
                 $('#warning').animate({opacity: 0.3}, 200).animate({opacity: 0}, 400).animate({opacity: 0.3}, 200).animate({opacity: 0}, 400);
                 this.spawnBoss();
@@ -182,7 +198,7 @@ window.onload = function() {
           }
           if (!killedEnemy) {
             try {
-              Crafty.audio.play("error" + Crafty.math.randomInt(1,NUM_ERROR_SOUNDS).toString(), 0);
+              Crafty.audio.play("error" + Crafty.math.randomInt(1,NUM_ERROR_SOUNDS).toString(), 1, 1.0);
             } catch (e) { }
           }
         }
@@ -426,14 +442,10 @@ window.onload = function() {
         return;
       }
       try {
-        Crafty.audio.play("playerDeath", 0);
+        Crafty.audio.play("playerDeath", 1, 1.0);
       } catch (e) { }
       this.dead = true;
       this.deathPosition = {x: this.x, y: this.y};
-      highScore = Math.max(highScore, score);
-      if (score == highScore) {
-        localStorage.setItem("highScore", highScore);
-      }
 
       Crafty.e("Explosion")
         .attr({x: this.x, y: this.y, z: 9001});
@@ -459,15 +471,15 @@ window.onload = function() {
 
     update: function(player) {
       if (this.x > player.x) {
-        this.x -= this.speed;
+        this.x = Math.max(this.x - this.speed, player.x);
       } else if (this.x < player.x) {
-        this.x += this.speed;
+        this.x = Math.min(this.x + this.speed, player.x);
       }
 
       if (this.y > player.y) {
-        this.y -= this.speed;
+        this.y = Math.max(this.y - this.speed, player.y);
       } else if (this.y < player.y) {
-        this.y += this.speed;
+        this.y = Math.min(this.y + this.speed, player.y);
       }
 
       direction = {
@@ -563,12 +575,16 @@ window.onload = function() {
 
   Crafty.scene("gameOver", function() {
     Crafty(Crafty("World")[0]).destroy();
-    $('#score-box').hide();
 
-    Crafty.audio.settings("gameMusic", {volume: 0});
-    try {
-      Crafty.audio.play("gameOver", 0);
-    } catch (e) { }
+    highScore = Math.max(highScore, score);
+    if (score == highScore) {
+      localStorage.setItem("highScore", highScore);
+    }
+
+    $('#score-box').hide();
+    
+    Crafty.audio.stop("gameMusic");
+    Crafty.audio.play("gameOver", 1, 0.0);
     fadeIn("gameOver", 0, 0.7);
 
     Crafty.viewport.x = 0;
@@ -579,10 +595,9 @@ window.onload = function() {
       .image(GAME_OVER_IMAGE)
       .bind("KeyDown", function(e) {
         if (e.key == Crafty.keys['ENTER']) {
-          Crafty.audio.settings("gameOver", {volume: 0});
+          Crafty.audio.play("gameMusic", -1, 0.0);
           fadeIn("gameMusic", 0, 0.7);
           Crafty.scene("main");
-          Crafty.audio.settings("gameMusic", {muted: false});
         }
       });
 
@@ -598,14 +613,14 @@ window.onload = function() {
       .attr({w: 300, h: 100, x: 446, y: 225, z: 5})
       .text("<span class='highscore'>High Score:</span> " + highScore)
       .textColor("#000000")
-      .css({'font-size': '24px', 'text-align': 'left', 'font-family': 'monospace'});
+      .css({'font-size': '24px', 'text-align': 'left'});
 
     // Score
     Crafty.e("2D, DOM, Text")
       .attr({w: 300, h: 100, x: 446, y: 255, z: 5})
       .text("<span class='score'>Score:</span> " + score)
       .textColor("#000000")
-      .css({'font-size': '24px', 'text-align': 'left', 'font-family': 'monospace'});
+      .css({'font-size': '24px', 'text-align': 'left'});
 
     // Kills
     Crafty.e("2D, DOM, Text")
@@ -617,7 +632,7 @@ window.onload = function() {
   });
 
   Crafty.scene("landing", function() {
-    Crafty.audio.play("gameMusic", -1).settings('gameMusic', {loop: true});
+    Crafty.audio.play("gameMusic", -1, 0.0);
     fadeIn("gameMusic", 0, 0.7);
 
     Crafty.e("2D, DOM, Image")
@@ -631,19 +646,22 @@ window.onload = function() {
   });
 
   Crafty.scene("loading", function() {
-    for (var i = 1; i <= 7; i++) {
-      Crafty.audio.add("dialBeep" + i.toString(), "audio/DIALBEEP" + i.toString() + '.mp3');
+    if (browser != "Safari") {
+      for (var i = 1; i <= NUM_DIAL_BEEPS; i++) {
+        loadAudio("dialBeep" + i.toString(), SOUND_DIRECTORY + "dialBeep" + i.toString());
+      }
+      for (var i = 1; i <= NUM_ZOMBIE_SOUNDS; i++) {
+        loadAudio("zombie" + i.toString(), SOUND_DIRECTORY + "zombie" + i.toString());
+      }
+      for (var i = 1; i <= NUM_ERROR_SOUNDS; i++) {
+        loadAudio("error" + i.toString(), SOUND_DIRECTORY + "error" + i.toString());
+      }
     }
-    for (var i = 1; i <= NUM_ZOMBIE_SOUNDS; i++) {
-      Crafty.audio.add("zombie" + i.toString(), "audio/ZOMBIE" + i.toString() + '.mp3');
-    }
-    for (var i = 1; i <= NUM_ERROR_SOUNDS; i++) {
-      Crafty.audio.add("error" + i.toString(), "audio/ERROR" + i.toString() + '.mp3');
-    }
-    Crafty.audio.add("gameMusic", "audio/gameMusic.mp3");
-    Crafty.audio.add("gameOver", "audio/gameOver.mp3");
-    Crafty.audio.add("bossAlert", "audio/siren.mp3");
-    Crafty.audio.add("playerDeath", "audio/scream.mp3");
+
+    loadAudio("gameMusic", MUSIC_DIRECTORY + "gameMusic");
+    loadAudio("gameOver", MUSIC_DIRECTORY + "gameOver");
+    loadAudio("bossAlert", SOUND_DIRECTORY + "siren");
+    loadAudio("playerDeath", SOUND_DIRECTORY + "scream");
 
     // Load sprites
     Crafty.sprite(100, 70, "img/hero.png", {PlayerSprite: [0, 0]});
