@@ -423,7 +423,9 @@ window.onload = function() {
         return;
       }
       if (arguments.length == 1 ? toggle : !isPaused) {
-        $("#countdown").text("ON HOLD").css("opacity", 1).show();
+        $("#countdown .main").text("ON HOLD");
+        $("#countdown .subtext").text("Press the + key to continue").show();
+        $("#countdown").css("opacity", 1).show();
         $("#warning").css("background", "black").css("opacity", 0.5).show();
         isPaused = true;
         timeOfLastKill = new Date() - timeOfLastKill;
@@ -433,11 +435,12 @@ window.onload = function() {
         unpausing = true;
         $("#warning").hide();
 
-        $("#countdown").text("3");
+        $("#countdown .subtext").hide();
+        $("#countdown .main").text("3");
         $("#countdown").animate({opacity: 1}, 100).animate({opacity: 0}, 900);
-        window.setTimeout(function(){$("#countdown").text("2");}, 1000);
+        window.setTimeout(function(){$("#countdown .main").text("2");}, 1000);
         $("#countdown").animate({opacity: 1}, 100).animate({opacity: 0}, 900);
-        window.setTimeout(function(){$("#countdown").text("1");}, 2000);
+        window.setTimeout(function(){$("#countdown .main").text("1");}, 2000);
         $("#countdown").animate({opacity: 1}, 100).animate({opacity: 0}, 900);
         window.setTimeout(function() {
           $("#countdown").hide();

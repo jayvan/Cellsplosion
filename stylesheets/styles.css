@@ -143,6 +143,10 @@ p {
   text-shadow: black 0 0 15px;
 }
 
+#countdown .subtext {
+  font-size: 50px;
+}
+
 #wrapper {
   width: 1198px;
 }
