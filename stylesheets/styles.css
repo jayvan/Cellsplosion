@@ -11,6 +11,11 @@ body {
   src: url('../fonts/lcdphone.ttf') format("truetype");
 }
 
+@font-face {
+  font-family: "HappyHell";
+  src: url('../fonts/happyhell.ttf') format("truetype");
+}
+
 #explanation {
   width: 800px;
   text-align: center;
@@ -64,11 +69,12 @@ p {
 }
 
 #warning {
-  position:absolute;
-  width:800px;
+  position: absolute;
+  width: 800px;
   height: 600px;
   background: red;
   opacity: 0;
+  display: none;
   z-index: 505;
   pointer-events: none;
 }
@@ -107,6 +113,38 @@ p {
   padding-top: 21px;
   text-align: right;
   padding-right: 20px;
+}
+
+#killStreak {
+  position: absolute;
+  top: 93px;
+  right: 32px;
+  font-family: "Lcdphone", monospace;
+  font-size: 30px;
+  text-align: right;
+  color: #76FB6F;
+  z-index: 501;
+  opacity: 0;
+}
+
+#countdown {
+  width: 700px;
+  position: absolute;
+  top: 208px;
+  left: 50px;
+  font-family: "HappyHell", monospace;
+  font-size: 150px;
+  text-align: center;
+  color: white;
+  z-index: 506;
+  display: none;
+  opacity: 0;
+  -webkit-text-stroke: 2px black;
+  text-shadow: black 0 0 15px;
+}
+
+#countdown .subtext {
+  font-size: 50px;
 }
 
 #wrapper {

@@ -42,7 +42,11 @@ window.onload = function() {
       ENEMY_BOSS_SPEED          = 4,
       ENEMY_BOSS_DIFFICULTY     = 7,
       MUSIC_DIRECTORY           = 'audio/music/',
-      SOUND_DIRECTORY           = 'audio/sound/';
+      SOUND_DIRECTORY           = 'audio/sound/',
+      KILL_STREAK_MULTIPLIER    = 7,
+      MINIMUM_KILL_STREAK       = 5,
+      KILL_STREAK_TIME          = 3000,
+      UNPAUSE_TIME              = 3000;
 
   var GAME_OVER_QUOTES = [ "Looks like this game played you.",
                            "Looks like this number is out of service.",
@@ -84,30 +88,62 @@ window.onload = function() {
         filePath + ".mp3",
         filePath + ".ogg"
         ]);
-  }
+  };
 
+  var addToScore = function(scoreToAdd) {
+    score += scoreToAdd;
+    $("#score-box .number").text(score);
+  };
+
+  var calculateKillStreakScore = function() {
+    return killStreak * killStreak * KILL_STREAK_MULTIPLIER;
+  };
+
+  var isPaused;
+  var unpausing;
   var score;
-  var enemiesKilled = 0;
+  var enemiesKilled;
+  var killStreak;
+  var timeOfLastKill;
   // Load high score
   var highScore = localStorage.getItem("highScore");
+  var world;
 
   if (highScore === null) {
     highScore = 0;
   }
 
+  $(window).blur(function(){
+    if (world) {
+      world.pause(true);
+    }
+  });
+
   Crafty.c("World", {
     init: function() {
+      isPaused = false;
+      unpausing = false;
       score = 0;
-      this.addToScore(0);
+      enemiesKilled = 0;
+      killStreak = 0;
+      timeOfLastKill = 0;
+
+      addToScore(0);
 
       this.player = Crafty.e("Player");
-      
       this.enemies = [];
       this.targetEnemyIndices = [];
       this.typedNumber = "";
-      enemiesKilled = 0;
 
       this.bind("KeyDown", function(e) {
+        if (!this.player.dead && (e.key == 61 || e.key == 107 || e.key == 187)) {
+          this.pause();
+        }
+
+        if (isPaused) {
+          return;
+        }
+
         var number = -1;
 
         if (e.key >= Crafty.keys['NUMPAD_0'] && e.key <= Crafty.keys['NUMPAD_9']) {
@@ -170,7 +206,7 @@ window.onload = function() {
               }
               catch(e) {}
               var enemyToDestroy = this.enemies[this.targetEnemyIndices[i]];
-              this.addToScore(enemyToDestroy.getScore());
+              addToScore(enemyToDestroy.getScore());
               enemyToDestroy.destroyEnemy();
               this.enemies.splice(this.targetEnemyIndices[i], 1);
               enemiesKilled += 1;
@@ -179,6 +215,7 @@ window.onload = function() {
                 try {
                   Crafty.audio.play("bossAlert", 1, 1.0);
                 } catch (e) { }
+                $("#warning").css("background", "red").css("opacity", "0").show();
                 $('#warning').animate({opacity: 0.3}, 200).animate({opacity: 0}, 400).animate({opacity: 0.3}, 200).animate({opacity: 0}, 400);
                 this.spawnBoss();
               } 
@@ -187,6 +224,14 @@ window.onload = function() {
                 this.spawnEnemy(false);
               }
               this.spawnEnemy(false);
+
+              killStreak += 1;
+              timeOfLastKill = new Date();
+              if (killStreak >= MINIMUM_KILL_STREAK) {
+                $("#killStreak").html("<span style='font-size: 18px'>x</span>" + killStreak);
+                $("#killStreak").stop().animate({opacity: 1.0}, 100);
+                $("#killStreak").animate({opacity: 0.0}, KILL_STREAK_TIME);
+              }
             }
             else {
               this.enemies[this.targetEnemyIndices[i]].resetCurDigitIndex();
@@ -205,6 +250,11 @@ window.onload = function() {
       });
 
       this.bind("EnterFrame", function() {
+        if (killStreak >= MINIMUM_KILL_STREAK && new Date() - timeOfLastKill >= KILL_STREAK_TIME) {
+          addToScore(calculateKillStreakScore());
+          killStreak = 0;
+        }
+
         // Update all of the enemies
         for (var i = 0; i < this.enemies.length; i++) {
           this.enemies[i].update(this.player);
@@ -368,9 +418,39 @@ window.onload = function() {
       $('#currentNumber .num').text(this.typedNumber);
     },
 
-    addToScore: function(pointsToAdd) {
-      score += pointsToAdd;
-      $("#score-box .number").text(score);
+    pause: function(toggle) {
+      if (unpausing) {
+        return;
+      }
+      if (arguments.length == 1 ? toggle : !isPaused) {
+        $("#countdown .main").text("ON HOLD");
+        $("#countdown .subtext").text("Press the + key to continue").show();
+        $("#countdown").css("opacity", 1).show();
+        $("#warning").css("background", "black").css("opacity", 0.5).show();
+        isPaused = true;
+        timeOfLastKill = new Date() - timeOfLastKill;
+        Crafty.pause(true);
+        $(".Number").hide();
+      } else {
+        unpausing = true;
+        $("#warning").hide();
+
+        $("#countdown .subtext").hide();
+        $("#countdown .main").text("3");
+        $("#countdown").animate({opacity: 1}, 100).animate({opacity: 0}, 900);
+        window.setTimeout(function(){$("#countdown .main").text("2");}, 1000);
+        $("#countdown").animate({opacity: 1}, 100).animate({opacity: 0}, 900);
+        window.setTimeout(function(){$("#countdown .main").text("1");}, 2000);
+        $("#countdown").animate({opacity: 1}, 100).animate({opacity: 0}, 900);
+        window.setTimeout(function() {
+          $("#countdown").hide();
+          isPaused = false;
+          unpausing = false;
+          timeOfLastKill = new Date() - timeOfLastKill;
+          Crafty.pause(false);
+          $(".Number").show();
+        }, UNPAUSE_TIME);
+      }
     },
 
     debug: function() {
@@ -404,8 +484,7 @@ window.onload = function() {
         })
         .bind("EnterFrame", function(e) {
           if (this.dead) {
-            this.x = this.deathPosition.x;
-            this.y = this.deathPosition.y;
+            this.disableControl();
           }
         })
         .bind("NewDirection", function(direction) {
@@ -446,6 +525,10 @@ window.onload = function() {
       } catch (e) { }
       this.dead = true;
       this.deathPosition = {x: this.x, y: this.y};
+
+      if (killStreak >= MINIMUM_KILL_STREAK) {
+        addToScore(calculateKillStreakScore());
+      }
 
       Crafty.e("Explosion")
         .attr({x: this.x, y: this.y, z: 9001});
@@ -570,12 +653,13 @@ window.onload = function() {
 
   Crafty.scene("main", function() {
     $("#score-box").show();
-    Crafty.e("World");
+    world = Crafty.e("World");
     _trackEvent("cell", "play");
   });
 
   Crafty.scene("gameOver", function() {
     Crafty(Crafty("World")[0]).destroy();
+    world = null;
 
     highScore = Math.max(highScore, score);
     if (score == highScore) {

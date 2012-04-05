@@ -6826,11 +6826,11 @@ Crafty.extend({
 		var prev_mute_state;
 		Crafty.bind("Pause", function () {
 				prev_mute_state=Crafty.audio._muted;
-				Crafty.audio.mute(true);
+				// Crafty.audio.mute(true);
 			});
 		Crafty.bind("Unpause", function () {
 				if(!prev_mute_state) {
-					Crafty.audio.mute(false);
+					// Crafty.audio.mute(false);
 				}
 			});
 })();
