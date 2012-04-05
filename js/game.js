@@ -45,7 +45,8 @@ window.onload = function() {
       SOUND_DIRECTORY           = 'audio/sound/',
       KILL_STREAK_MULTIPLIER    = 7,
       MINIMUM_KILL_STREAK       = 5,
-      KILL_STREAK_TIME          = 3000;
+      KILL_STREAK_TIME          = 3000,
+      UNPAUSE_TIME              = 3000;
 
   var GAME_OVER_QUOTES = [ "Looks like this game played you.",
                            "Looks like this number is out of service.",
@@ -98,19 +99,30 @@ window.onload = function() {
     return killStreak * killStreak * KILL_STREAK_MULTIPLIER;
   };
 
+  var isPaused;
+  var unpausing;
   var score;
   var enemiesKilled;
   var killStreak;
   var timeOfLastKill;
   // Load high score
   var highScore = localStorage.getItem("highScore");
+  var world;
 
   if (highScore === null) {
     highScore = 0;
   }
 
+  $(window).blur(function(){
+    if (world) {
+      world.pause(true);
+    }
+  });
+
   Crafty.c("World", {
     init: function() {
+      isPaused = false;
+      unpausing = false;
       score = 0;
       enemiesKilled = 0;
       killStreak = 0;
@@ -124,6 +136,14 @@ window.onload = function() {
       this.typedNumber = "";
 
       this.bind("KeyDown", function(e) {
+        if (!this.player.dead && (e.key == 61 || e.key == 107 || e.key == 187)) {
+          this.pause();
+        }
+
+        if (isPaused) {
+          return;
+        }
+
         var number = -1;
 
         if (e.key >= Crafty.keys['NUMPAD_0'] && e.key <= Crafty.keys['NUMPAD_9']) {
@@ -195,6 +215,7 @@ window.onload = function() {
                 try {
                   Crafty.audio.play("bossAlert", 1, 1.0);
                 } catch (e) { }
+                $("#warning").css("background", "red").css("opacity", "0").show();
                 $('#warning').animate({opacity: 0.3}, 200).animate({opacity: 0}, 400).animate({opacity: 0.3}, 200).animate({opacity: 0}, 400);
                 this.spawnBoss();
               } 
@@ -397,6 +418,38 @@ window.onload = function() {
       $('#currentNumber .num').text(this.typedNumber);
     },
 
+    pause: function(toggle) {
+      if (unpausing) {
+        return;
+      }
+      if (arguments.length == 1 ? toggle : !isPaused) {
+        $("#countdown").text("ON HOLD").css("opacity", 1).show();
+        $("#warning").css("background", "black").css("opacity", 0.5).show();
+        isPaused = true;
+        timeOfLastKill = new Date() - timeOfLastKill;
+        Crafty.pause(true);
+        $(".Number").hide();
+      } else {
+        unpausing = true;
+        $("#warning").hide();
+
+        $("#countdown").text("3");
+        $("#countdown").animate({opacity: 1}, 100).animate({opacity: 0}, 900);
+        window.setTimeout(function(){$("#countdown").text("2");}, 1000);
+        $("#countdown").animate({opacity: 1}, 100).animate({opacity: 0}, 900);
+        window.setTimeout(function(){$("#countdown").text("1");}, 2000);
+        $("#countdown").animate({opacity: 1}, 100).animate({opacity: 0}, 900);
+        window.setTimeout(function() {
+          $("#countdown").hide();
+          isPaused = false;
+          unpausing = false;
+          timeOfLastKill = new Date() - timeOfLastKill;
+          Crafty.pause(false);
+          $(".Number").show();
+        }, UNPAUSE_TIME);
+      }
+    },
+
     debug: function() {
       console.log("Current Number:", this.typedNumber);
       console.log("Enemies");
@@ -428,8 +481,7 @@ window.onload = function() {
         })
         .bind("EnterFrame", function(e) {
           if (this.dead) {
-            this.x = this.deathPosition.x;
-            this.y = this.deathPosition.y;
+            this.disableControl();
           }
         })
         .bind("NewDirection", function(direction) {
@@ -598,11 +650,12 @@ window.onload = function() {
 
   Crafty.scene("main", function() {
     $("#score-box").show();
-    Crafty.e("World");
+    world = Crafty.e("World");
   });
 
   Crafty.scene("gameOver", function() {
     Crafty(Crafty("World")[0]).destroy();
+    world = null;
 
     highScore = Math.max(highScore, score);
     if (score == highScore) {
