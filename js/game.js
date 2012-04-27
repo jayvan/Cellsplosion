@@ -17,8 +17,6 @@ window.onload = function() {
       EASY_ENEMY_MAX_DIFFICULTY = 4,
       ENEMY_HEIGHT              = 77,
       NUMBER_FONT_SIZE          = 20,
-      WORLD_WIDTH               = VIEWPORT_WIDTH * 3,
-      WORLD_HEIGHT              = VIEWPORT_HEIGHT * 3,
       WALL_SIZE                 = 50,
       PLAYER_WIDTH              = 100,
       PLAYER_HEIGHT             = 70,
@@ -69,6 +67,14 @@ window.onload = function() {
   Crafty.init(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
   Crafty.background("grey");
 
+  var warningSiren = function() {
+    try {
+      Crafty.audio.play("bossAlert", 1, 1.0);
+    } catch (e) { }
+    $("#warning").css("background", "red").css("opacity", "0").show();
+    $('#warning').animate({opacity: 0.3}, 200).animate({opacity: 0}, 400).animate({opacity: 0.3}, 200).animate({opacity: 0}, 400);
+  }
+
   var fadeIn = function(name, vol, maxVol) {
     if (typeof(vol) === "undefined") {
       vol = 0;
@@ -107,10 +113,16 @@ window.onload = function() {
   var timeOfLastKill;
   // Load high score
   var highScore = localStorage.getItem("highScore");
+  var tutorialComplete = localStorage.getItem("tutorialComplete");
+
   var world;
 
   if (highScore === null) {
     highScore = 0;
+  }
+
+  if (tutorialComplete) {
+    $('#info-bar').css('opacity', '1');
   }
 
   $(window).blur(function(){
@@ -212,11 +224,7 @@ window.onload = function() {
               enemiesKilled += 1;
 
               if (enemiesKilled % ENEMY_BOSS_FREQUENCY === 0) {
-                try {
-                  Crafty.audio.play("bossAlert", 1, 1.0);
-                } catch (e) { }
-                $("#warning").css("background", "red").css("opacity", "0").show();
-                $('#warning').animate({opacity: 0.3}, 200).animate({opacity: 0}, 400).animate({opacity: 0.3}, 200).animate({opacity: 0}, 400);
+                warningSiren();
                 this.spawnBoss();
               } 
 
@@ -263,18 +271,16 @@ window.onload = function() {
         // Bounds check the player
         if (this.player.x < WALL_SIZE) {
           this.player.x = WALL_SIZE;
-        } else if (this.player.x > WORLD_WIDTH - WALL_SIZE - PLAYER_WIDTH) {
-          this.player.x = WORLD_WIDTH - WALL_SIZE - PLAYER_WIDTH;
+        } else if (this.player.x > this.width - WALL_SIZE - PLAYER_WIDTH) {
+          this.player.x = this.width - WALL_SIZE - PLAYER_WIDTH;
         }
         
         if (this.player.y < WALL_SIZE) {
           this.player.y = WALL_SIZE;
-        } else if (this.player.y > WORLD_HEIGHT - WALL_SIZE - PLAYER_HEIGHT) {
-          this.player.y = WORLD_HEIGHT - WALL_SIZE - PLAYER_HEIGHT;
+        } else if (this.player.y > this.height - WALL_SIZE - PLAYER_HEIGHT) {
+          this.player.y = this.height - WALL_SIZE - PLAYER_HEIGHT;
         }
       });
-
-      this.startGame();
     },
 
     setViewport: function() {
@@ -282,12 +288,16 @@ window.onload = function() {
     },
     
     spawnEnemy: function(easyMode) {
+      if (!this.spawnEnemies) {
+        return false;
+      }
+
       var x = 0,
           y = 0;
 
       do {
-        x = Crafty.math.randomInt(WALL_SIZE, WORLD_WIDTH - WALL_SIZE - ENEMY_WIDTH);
-        y = Crafty.math.randomInt(WALL_SIZE, WORLD_HEIGHT - WALL_SIZE - ENEMY_HEIGHT);
+        x = Crafty.math.randomInt(WALL_SIZE, this.width - WALL_SIZE - ENEMY_WIDTH);
+        y = Crafty.math.randomInt(WALL_SIZE, this.height - WALL_SIZE - ENEMY_HEIGHT);
       } while ( x >= -Crafty.viewport.x - ENEMY_WIDTH &&
                 x <= -Crafty.viewport.x + VIEWPORT_WIDTH &&
                 y >= -Crafty.viewport.y - ENEMY_HEIGHT &&
@@ -330,8 +340,8 @@ window.onload = function() {
           y = 0;
 
       do {
-        x = Crafty.math.randomInt(WALL_SIZE, WORLD_WIDTH - WALL_SIZE - ENEMY_WIDTH);
-        y = Crafty.math.randomInt(WALL_SIZE, WORLD_HEIGHT - WALL_SIZE - ENEMY_HEIGHT);
+        x = Crafty.math.randomInt(WALL_SIZE, this.width - WALL_SIZE - ENEMY_WIDTH);
+        y = Crafty.math.randomInt(WALL_SIZE, this.height - WALL_SIZE - ENEMY_HEIGHT);
       } while ( x >= -Crafty.viewport.x - ENEMY_WIDTH &&
                 x <= -Crafty.viewport.x + VIEWPORT_WIDTH &&
                 y >= -Crafty.viewport.y - ENEMY_HEIGHT &&
@@ -348,41 +358,53 @@ window.onload = function() {
       this.enemies.push(boss);
     },
     
-    startGame: function() {
+    startGame: function(width, height, initialCount, spawning) {
+      if (typeof(initialCount) === "undefined") {
+        initialCount = INITIAL_ENEMY_COUNT;
+      }
+
+      if (typeof(spawning) === "undefined") {
+        spawning = true;
+      }
+
+      this.width = width;
+      this.height = height;
+      this.spawnEnemies = spawning;
+      this.player.attr({x: this.width / 2 - PLAYER_WIDTH / 2, y: this.height / 2 - PLAYER_HEIGHT / 2});
       this.setViewport();
 
-      for (var i = 0; i < INITIAL_ENEMY_COUNT; i++) {
+      for (var i = 0; i < initialCount; i++) {
         this.spawnEnemy(true);
         this.targetEnemyIndices.push(i);
       }
 
       // Create the floor
       Crafty.e("2D, DOM, Image")
-       .attr({w: WORLD_WIDTH, h: WORLD_HEIGHT, z: -5})
+       .attr({w: this.width, h: this.height, z: -5})
        .image(FLOOR_IMAGE, "repeat");
 
       Crafty.e("2D, DOM, Image")
-        .attr({w: WORLD_WIDTH, h: WORLD_HEIGHT, z: -4})
+        .attr({w: this.width, h: this.height, z: -4})
         .image(PARKING_IMAGE, "repeat");
 
       // Create the walls
       // Left
       Crafty.e("2D, DOM, Image")
-        .attr({w: WALL_SIZE, h: WORLD_HEIGHT, x: 0, y: 0, z: -3})
+        .attr({w: WALL_SIZE, h: this.height, x: 0, y: 0, z: -3})
         .image(WALL_VERTICAL_IMAGE, "repeat");
       // Right
       Crafty.e("2D, DOM, Image")
-        .attr({w: WALL_SIZE, h: WORLD_HEIGHT, x: WORLD_WIDTH - WALL_SIZE, y: 0, z: -3})
+        .attr({w: WALL_SIZE, h: this.height, x: this.width - WALL_SIZE, y: 0, z: -3})
         .image(WALL_VERTICAL_IMAGE, "repeat")
         .flip("X");
       // Bottom
       Crafty.e("2D, DOM, Image")
-        .attr({w: WORLD_WIDTH, h: WALL_SIZE, x: 0, y: WORLD_HEIGHT - WALL_SIZE, z: -3})
+        .attr({w: this.width, h: WALL_SIZE, x: 0, y: this.height - WALL_SIZE, z: -3})
         .image(WALL_HORIZONTAL_IMAGE, "repeat")
         .flip("Y");
       // Top
       Crafty.e("2D, DOM, Image")
-        .attr({w: WORLD_WIDTH, h: WALL_SIZE, x: 0, y: 0, z: -3})
+        .attr({w: this.width, h: WALL_SIZE, x: 0, y: 0, z: -3})
         .image(WALL_HORIZONTAL_IMAGE, "repeat");
 
       // Top left corner
@@ -392,19 +414,19 @@ window.onload = function() {
 
       // Top Right corner
       Crafty.e("2D, DOM, Image")
-        .attr({w: WALL_SIZE, h: WALL_SIZE, x: WORLD_WIDTH - WALL_SIZE, y: 0, z: -2})
+        .attr({w: WALL_SIZE, h: WALL_SIZE, x: this.width - WALL_SIZE, y: 0, z: -2})
         .image(WALL_CORNER_IMAGE, "repeat")
         .flip("X");
 
       // Bottom Left
       Crafty.e("2D, DOM, Image")
-        .attr({w: WALL_SIZE, h: WALL_SIZE, x: 0, y: WORLD_HEIGHT - WALL_SIZE, z: -2})
+        .attr({w: WALL_SIZE, h: WALL_SIZE, x: 0, y: this.height - WALL_SIZE, z: -2})
         .image(WALL_CORNER_IMAGE, "repeat")
         .flip("Y");
 
       // Bottom Right
       Crafty.e("2D, DOM, Image")
-        .attr({w: WALL_SIZE, h: WALL_SIZE, x: WORLD_WIDTH - WALL_SIZE, y: WORLD_HEIGHT - WALL_SIZE, z: -2})
+        .attr({w: WALL_SIZE, h: WALL_SIZE, x: this.width - WALL_SIZE, y: this.height - WALL_SIZE, z: -2})
         .image("img/wall_corner_bottom_right.png", "repeat");
     },
 
@@ -469,7 +491,7 @@ window.onload = function() {
   Crafty.c("Player", {
     init: function() {
       this.addComponent("2D, DOM, Multiway, Collision, SpriteAnimation, PlayerSprite")
-        .attr({x: WORLD_WIDTH / 2, y: WORLD_HEIGHT / 2, w: PLAYER_WIDTH, h: PLAYER_HEIGHT, z: 5})
+        .attr({x: this.width / 2, y: this.height / 2, w: PLAYER_WIDTH, h: PLAYER_HEIGHT, z: 5})
         .origin(PLAYER_WIDTH / 2, PLAYER_HEIGHT / 2)
         .multiway(PLAYER_SPEED, {W: -90, S: 90, D: 0, A: 180})
         .animate('PlayerWalk', 0, 0, 3)
@@ -524,7 +546,6 @@ window.onload = function() {
         Crafty.audio.play("playerDeath", 1, 1.0);
       } catch (e) { }
       this.dead = true;
-      this.deathPosition = {x: this.x, y: this.y};
 
       if (killStreak >= MINIMUM_KILL_STREAK) {
         addToScore(calculateKillStreakScore());
@@ -624,6 +645,7 @@ window.onload = function() {
     
     destroyEnemy: function() {
       this.dead = true;
+      this.trigger("Die");
       Crafty.e("Explosion")
         .attr({x: this.x, y: this.y});
 
@@ -653,8 +675,65 @@ window.onload = function() {
 
   Crafty.scene("main", function() {
     $("#score-box").show();
-    world = Crafty.e("World");
+    world = null;
+    world = Crafty.e("World").startGame(VIEWPORT_WIDTH * 3, VIEWPORT_HEIGHT * 3);
     _trackEvent("cell", "play");
+  });
+
+  Crafty.scene("tutorial", function() {
+    $("#score-box").show();
+    world = Crafty.e("World").startGame(VIEWPORT_WIDTH, VIEWPORT_HEIGHT, 0, false);
+
+    var hintText = Crafty.e("2D, DOM, Text")
+      .attr({w: VIEWPORT_WIDTH - 2 * WALL_SIZE, h: 80, x: WALL_SIZE, y: VIEWPORT_HEIGHT - WALL_SIZE - 80, z: 5})
+      .text("Hold W, A, S, and D to walk around</br>Grab a phone, you'll need it!")
+      .textColor("#ffffff")
+      .css({'font-size': '30px', 'text-align': 'center', 'font-family': 'monospace', 'background': 'rgba(0,0,0,0.75)'});
+
+    var checkTutorialOver = function() {
+      var targetsRemaining = Crafty("CellPhone").length;
+      if (targetsRemaining == 0) {
+        hintText.text("Quick! Type the number above the zombies head and press enter!");
+        $("#info-bar").animate({opacity: 1.0}, 1000);
+        Crafty(Crafty("Player")[0]).disableControl().stop();
+
+        var world = Crafty(Crafty("World")[0]);
+        var enemy = Crafty.e("Enemy").addComponent("EnemySprite").difficulty(3).setSpeed(0).attr({x: VIEWPORT_WIDTH / 2 - ENEMY_WIDTH / 2, y: VIEWPORT_HEIGHT / 2 - ENEMY_HEIGHT / 2});
+        enemy.bind("Die", function() {
+          hintText.text("Kaboom, Baby!<br />Starting the full game in 5 seconds...");
+          localStorage.setItem("tutorialComplete", true);
+          window.setTimeout(function() {
+            warningSiren();
+            Crafty.scene("main");
+          }, 5000);
+        });
+
+        world.enemies.push(enemy);
+        world.targetEnemyIndices.push(0);
+      } else {
+        hintText.text("This one's a dud!</br>Grab the other phone, quick!")
+      }
+
+      return false;
+    }
+
+    Crafty.e("2D, DOM, Color, Collision, CellPhone")
+      .attr({w: 75, h: 75, x: WALL_SIZE + 5, y: WALL_SIZE + 5})
+      .color("Green")
+      .css({'border-radius': '25px'})
+      .collision().onHit("Player", function(e) {
+        this.destroy();
+        checkTutorialOver();
+      });
+
+    Crafty.e("2D, DOM, Color, Collision, CellPhone")
+      .attr({w: 75, h: 75, x: VIEWPORT_WIDTH - WALL_SIZE - 80, y: VIEWPORT_HEIGHT - WALL_SIZE - 160})
+      .color("Green")
+      .css({'border-radius': '25px'})
+      .collision().onHit("Player", function(e) {
+        this.destroy();
+        checkTutorialOver();
+      });
   });
 
   Crafty.scene("gameOver", function() {
@@ -727,7 +806,11 @@ window.onload = function() {
       .image(INTRO_IMAGE)
       .bind("KeyDown", function(e) {
         if (e.key == Crafty.keys['ENTER']) {
-          Crafty.scene("main");
+          if (tutorialComplete) {
+            Crafty.scene("main");
+          } else {
+            Crafty.scene("tutorial");
+          }
         }
       });
   });
@@ -756,6 +839,7 @@ window.onload = function() {
     Crafty.sprite(100, 100, "img/enemy2.png", {BossSprite: [0, 0]});
     Crafty.sprite(80, 139, "img/cars.png", {RedCarSprite: [0, 0], BlueCarSprite: [1, 0], GreenCarSprite: [2, 0]}, 10, 0);
     Crafty.sprite(100, 100, "img/explosion1.png", {Explosion1: [0, 0]});
+    Crafty.sprite(75, 75, "img/cell_pickup.png", {CellPhone: [0, 0]});
 
     Crafty.scene("landing");
 
