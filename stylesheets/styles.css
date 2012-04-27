@@ -19,6 +19,7 @@ body {
 #explanation {
   width: 800px;
   text-align: center;
+  float: left;
 }
 
 p {
@@ -77,6 +78,7 @@ p {
   display: none;
   z-index: 505;
   pointer-events: none;
+  border-radius: 17px;
 }
 
 #cr-stage {
@@ -93,6 +95,7 @@ p {
   color: #E4492B;
   font-size: 26px;
   position: relative;
+  opacity: 0;
 }
 
 #score-box {
