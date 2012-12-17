@@ -13,10 +13,6 @@ Why are these enemies attacking you?
 ====================================
 They are employees and executives of the Terobell.  They need to stop your "evil" plan!
 
-Essential Ideas:
-================
-- Moving AI
-
 Additional Ideas:
 =================
 - AoE damage radius
@@ -39,23 +35,6 @@ Movement:
 - get points by killing enemies
 - get high score
 - you die when you get hit once
-
-
-Typing:
-=======
-- No Backspace key
-- Use Enter key to activate explosion
-- No "lock-in" to a certain enemy (i.e. 905 and 904 are both viable at '90')
-
-Spawning:
-=========
-- Spawn off screen always
-* Try viewport follow
-
-** Trim the sprite to reduce collision box size
-
-
-*** Pull request for music repeat
 
 Credits:
 ========
